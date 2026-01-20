@@ -1,6 +1,8 @@
 /**
- * OKAK API SDK
- * Внутренний модуль для работы с API сервисами
+ * OKAK API SDK v1.0.0
+ * https://vriskasyt.github.io/api/
+ * 
+ * Официальный SDK для работы с OKAK API сервисами
  * 
  * Использование:
  * - OKAK.ai(prompt, model) - генерация текста
@@ -9,6 +11,7 @@
  * - OKAK.hash(text, algo) - хеширование
  * - OKAK.base64(text, mode) - Base64
  * - OKAK.uuid() - генерация UUID
+ * - OKAK.health() - проверка сервисов
  */
 
 const OKAK = (function() {
