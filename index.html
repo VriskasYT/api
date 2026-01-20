@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OKAK API - Бесплатная API Платформа</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .gradient-text { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 25px 50px -12px rgba(102, 126, 234, 0.25); }
+        .code-block { background: #1a1b26; color: #a9b1d6; }
+        .pulse-dot { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { animation: spin 1s linear infinite; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1b2e; }
+        ::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
+        .tab-active { background: rgba(102, 126, 234, 0.2); color: white; border-color: #667eea; }
+        .fade-in { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .sidebar-link { transition: all 0.2s; }
+        .sidebar-link:hover, .sidebar-link.active { background: rgba(102, 126, 234, 0.2); color: white; }
+        
+        /* Фикс для навигации */
+        .nav-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 64px;
+        }
+        .content-with-nav {
+            padding-top: 64px;
+        }
+        .dashboard-content {
+            padding-top: 64px;
+        }
+        @media (max-width: 1024px) {
+            .dashboard-content {
+                padding-top: 120px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-[#0f0f1a] text-white min-h-screen">
+    <!-- Навигация -->
+    <nav class="nav-fixed glass border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-full flex justify-between items-center">
+            <a href="#" onclick="goHome(); return false;" class="flex items-center gap-3 flex-shrink-0">
+                <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center font-bold text-xl">O</div>
+                <span class="text-xl font-bold hidden sm:block">OKAK API</span>
+            </a>
+            <div id="navLinks" class="hidden md:flex gap-6 text-gray-400 text-sm">
+                <a href="#features" class="hover:text-white transition cursor-pointer">Возможности</a>
+                <a href="#docs" class="hover:text-white transition cursor-pointer">Документация</a>
+                <a href="#playground" class="hover:text-white transition cursor-pointer">Playground</a>
+            </div>
+            <div id="navButtons" class="flex items-center gap-2 flex-shrink-0"></div>
+        </div>
+    </nav>
+
+    <!-- Главная страница (гость) -->
+    <div id="guestPage" class="content-with-nav">
+        <!-- Hero -->
+        <section class="pt-12 pb-20 px-4">
+            <div class="max-w-6xl mx-auto text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm mb-8">
+                    <span class="w-2 h-2 bg-green-400 rounded-full pulse-dot"></span>
+                    Все сервисы работают • 100% бесплатно
+                </div>
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+                    Бесплатные <span class="gradient-text">API</span><br>
+                    для разработчиков
+                </h1>
+                <p class="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10">
+                    ИИ-генерация текста и изображений, облачная база данных, 
+                    QR-коды, хеширование и многое другое. Навсегда бесплатно.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="showAuth('register')" class="px-8 py-4 gradient-bg rounded-xl font-semibold text-lg hover:opacity-90 transition shadow-lg shadow-purple-500/25">
+                        Начать бесплатно →
+                    </button>
+                    <a href="#docs" class="px-8 py-4 glass rounded-xl font-semibold text-lg hover:bg-white/10 transition text-center">
+                        Документация
+                    </a>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
+                    <div class="glass rounded-2xl p-6 card-hover">
+                        <div class="text-3xl font-bold gradient-text">∞</div>
+                        <div class="text-gray-400 text-sm mt-1">Запросов</div>
+                    </div>
+                    <div class="glass rounded-2xl p-6 card-hover">
+                        <div class="text-3xl font-bold gradient-text">0₽</div>
+                        <div class="text-gray-400 text-sm mt-1">Навсегда</div>
+                    </div>
+                    <div class="glass rounded-2xl p-6 card-hover">
+                        <div class="text-3xl font-bold gradient-text">10+</div>
+                        <div class="text-gray-400 text-sm mt-1">API сервисов</div>
+                    </div>
+                    <div class="glass rounded-2xl p-6 card-hover">
+                        <div class="text-3xl font-bold gradient-text">99.9%</div>
+                        <div class="text-gray-400 text-sm mt-1">Uptime</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="features" class="py-20 px-4">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center mb-4">🚀 Наши API сервисы</h2>
+                <p class="text-gray-400 text-center mb-12 max-w-2xl mx-auto">Всё необходимое для создания современных приложений</p>
+                
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="glass rounded-2xl p-8 card-hover">
+                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center text-2xl mb-6">🧠</div>
+                        <h3 class="text-xl font-bold mb-3">OKAK AI</h3>
+                        <p class="text-gray-400 text-sm mb-4">Генерация текста с помощью ИИ. Поддержка различных моделей и режимов.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-purple-500/20 rounded-full text-xs text-purple-300">GPT</span>
+                            <span class="px-3 py-1 bg-blue-500/20 rounded-full text-xs text-blue-300">Gemini</span>
+                            <span class="px-3 py-1 bg-orange-500/20 rounded-full text-xs text-orange-300">Mistral</span>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-8 card-hover">
+                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center text-2xl mb-6">🎨</div>
+                        <h3 class="text-xl font-bold mb-3">OKAK Image</h3>
+                        <p class="text-gray-400 text-sm mb-4">Создание изображений по описанию. Flux, Turbo и другие модели.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-pink-500/20 rounded-full text-xs text-pink-300">Flux</span>
+                            <span class="px-3 py-1 bg-cyan-500/20 rounded-full text-xs text-cyan-300">Turbo</span>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-8 card-hover">
+                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center text-2xl mb-6">🗄️</div>
+                        <h3 class="text-xl font-bold mb-3">OKAK Database</h3>
+                        <p class="text-gray-400 text-sm mb-4">Облачная NoSQL база данных с синхронизацией в реальном времени.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-green-500/20 rounded-full text-xs text-green-300">Realtime</span>
+                            <span class="px-3 py-1 bg-yellow-500/20 rounded-full text-xs text-yellow-300">JSON</span>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-8 card-hover">
+                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center text-2xl mb-6">📱</div>
+                        <h3 class="text-xl font-bold mb-3">OKAK QR</h3>
+                        <p class="text-gray-400 text-sm mb-4">Генерация QR-кодов любого размера и цвета для ваших проектов.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-indigo-500/20 rounded-full text-xs text-indigo-300">PNG</span>
+                            <span class="px-3 py-1 bg-red-500/20 rounded-full text-xs text-red-300">Custom</span>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-8 card-hover">
+                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center text-2xl mb-6">🔐</div>
+                        <h3 class="text-xl font-bold mb-3">OKAK Crypto</h3>
+                        <p class="text-gray-400 text-sm mb-4">Хеширование, шифрование и генерация случайных данных.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-emerald-500/20 rounded-full text-xs text-emerald-300">SHA-256</span>
+                            <span class="px-3 py-1 bg-teal-500/20 rounded-full text-xs text-teal-300">MD5</span>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-8 card-hover">
+                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center text-2xl mb-6">🌐</div>
+                        <h3 class="text-xl font-bold mb-3">OKAK Utils</h3>
+                        <p class="text-gray-400 text-sm mb-4">Полезные утилиты: UUID, Base64, валидация и форматирование.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-violet-500/20 rounded-full text-xs text-violet-300">UUID</span>
+                            <span class="px-3 py-1 bg-fuchsia-500/20 rounded-full text-xs text-fuchsia-300">Base64</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Documentation Preview -->
+        <section id="docs" class="py-20 px-4 bg-gradient-to-b from-transparent to-purple-900/10">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center mb-4">📚 Документация</h2>
+                <p class="text-gray-400 text-center mb-12">Простая интеграция за минуты</p>
+
+                <div class="glass rounded-2xl p-6 sm:p-8">
+                    <div class="flex flex-wrap gap-2 mb-6 border-b border-white/10 pb-4">
+                        <button onclick="showDocTab('quick')" class="doc-tab px-4 py-2 rounded-lg text-sm transition tab-active" data-tab="quick">Быстрый старт</button>
+                        <button onclick="showDocTab('ai')" class="doc-tab px-4 py-2 rounded-lg text-sm transition text-gray-400 hover:text-white" data-tab="ai">AI API</button>
+                        <button onclick="showDocTab('image')" class="doc-tab px-4 py-2 rounded-lg text-sm transition text-gray-400 hover:text-white" data-tab="image">Image API</button>
+                        <button onclick="showDocTab('db')" class="doc-tab px-4 py-2 rounded-lg text-sm transition text-gray-400 hover:text-white" data-tab="db">Database</button>
+                        <button onclick="showDocTab('qr')" class="doc-tab px-4 py-2 rounded-lg text-sm transition text-gray-400 hover:text-white" data-tab="qr">QR API</button>
+                        <button onclick="showDocTab('crypto')" class="doc-tab px-4 py-2 rounded-lg text-sm transition text-gray-400 hover:text-white" data-tab="crypto">Crypto</button>
+                    </div>
+
+                    <div id="docContent">
+                        <!-- Quick Start -->
+                        <div id="doc-quick" class="doc-section fade-in">
+                            <h3 class="text-xl font-bold mb-4">🚀 Начало работы</h3>
+                            <div class="space-y-4">
+                                <div class="flex gap-4 items-start">
+                                    <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center font-bold flex-shrink-0">1</div>
+                                    <div>
+                                        <div class="font-semibold">Зарегистрируйтесь</div>
+                                        <div class="text-gray-400 text-sm">Создайте бесплатный аккаунт на OKAK API</div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 items-start">
+                                    <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center font-bold flex-shrink-0">2</div>
+                                    <div>
+                                        <div class="font-semibold">Создайте API ключ</div>
+                                        <div class="text-gray-400 text-sm">Выберите тип: публичный (pk_) или секретный (sk_)</div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 items-start">
+                                    <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center font-bold flex-shrink-0">3</div>
+                                    <div>
+                                        <div class="font-semibold">Используйте API</div>
+                                        <div class="text-gray-400 text-sm">Интегрируйте в свой проект</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6 code-block rounded-xl p-4 overflow-x-auto">
+                                <pre class="mono text-sm"><span class="text-gray-500">// Пример запроса к AI API</span>
+<span class="text-purple-400">const</span> response = <span class="text-purple-400">await</span> <span class="text-yellow-300">fetch</span>(<span class="text-green-400">'https://YOUR_SITE/api/ai?prompt=Привет&key=YOUR_KEY'</span>);
+<span class="text-purple-400">const</span> data = <span class="text-purple-400">await</span> response.<span class="text-yellow-300">json</span>();
+console.<span class="text-yellow-300">log</span>(data.text);</pre>
+                            </div>
+                        </div>
+
+                        <!-- AI API -->
+                        <div id="doc-ai" class="doc-section hidden">
+                            <h3 class="text-xl font-bold mb-4">🧠 AI API - Генерация текста</h3>
+                            <p class="text-gray-400 mb-4">Генерация текста с помощью различных ИИ моделей</p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-mono">GET</span>
+                                        <span class="mono text-sm">/api/ai?prompt={text}&model={model}&key={key}</span>
+                                    </div>
+                                    <div class="code-block rounded-xl p-4 overflow-x-auto">
+                                        <pre class="mono text-sm"><span class="text-gray-500">// JavaScript</span>
+<span class="text-purple-400">const</span> res = <span class="text-purple-400">await</span> <span class="text-yellow-300">fetch</span>(
+  <span class="text-green-400">`https://yoursite.github.io/api/ai?prompt=</span><span class="text-yellow-300">${</span>prompt<span class="text-yellow-300">}</span><span class="text-green-400">&key=</span><span class="text-yellow-300">${</span>apiKey<span class="text-yellow-300">}</span><span class="text-green-400">`</span>
+);
+<span class="text-purple-400">const</span> data = <span class="text-purple-400">await</span> res.<span class="text-yellow-300">json</span>();</pre>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl">
+                                    <div class="font-semibold text-purple-400 mb-2">Доступные модели:</div>
+                                    <div class="flex flex-wrap gap-2">
+                                        <code class="px-2 py-1 bg-black/30 rounded text-xs">openai</code>
+                                        <code class="px-2 py-1 bg-black/30 rounded text-xs">gemini</code>
+                                        <code class="px-2 py-1 bg-black/30 rounded text-xs">mistral</code>
+                                        <code class="px-2 py-1 bg-black/30 rounded text-xs">llama</code>
+                                        <code class="px-2 py-1 bg-black/30 rounded text-xs">deepseek</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image API -->
+                        <div id="doc-image" class="doc-section hidden">
+                            <h3 class="text-xl font-bold mb-4">🎨 Image API - Генерация изображений</h3>
+                            <p class="text-gray-400 mb-4">Создание изображений по текстовому описанию</p>
+                            
+                            <div class="code-block rounded-xl p-4 overflow-x-auto mb-4">
+                                <pre class="mono text-sm"><span class="text-gray-500">// Генерация изображения</span>
+<span class="text-purple-400">const</span> imageUrl = <span class="text-green-400">`https://yoursite.github.io/api/image?prompt=</span><span class="text-yellow-300">${</span>prompt<span class="text-yellow-300">}</span><span class="text-green-400">&key=</span><span class="text-yellow-300">${</span>key<span class="text-yellow-300">}</span><span class="text-green-400">`</span>;
+
+<span class="text-gray-500">// С параметрами</span>
+<span class="text-purple-400">const</span> url = <span class="text-green-400">'...?prompt=cat&width=512&height=512&model=flux'</span>;</pre>
+                            </div>
+                            
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div class="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                                    <div class="font-semibold text-blue-400 mb-2">Параметры:</div>
+                                    <ul class="text-sm text-gray-300 space-y-1">
+                                        <li><code>prompt</code> - описание</li>
+                                        <li><code>width</code> - ширина (до 1024)</li>
+                                        <li><code>height</code> - высота (до 1024)</li>
+                                        <li><code>model</code> - flux, turbo</li>
+                                    </ul>
+                                </div>
+                                <div class="p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+                                    <div class="font-semibold text-green-400 mb-2">Модели:</div>
+                                    <ul class="text-sm text-gray-300 space-y-1">
+                                        <li><code>flux</code> - высокое качество</li>
+                                        <li><code>turbo</code> - быстрая генерация</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Database -->
+                        <div id="doc-db" class="doc-section hidden">
+                            <h3 class="text-xl font-bold mb-4">🗄️ Database API</h3>
+                            <p class="text-gray-400 mb-4">Облачная база данных в реальном времени</p>
+                            
+                            <div class="code-block rounded-xl p-4 overflow-x-auto mb-4">
+                                <pre class="mono text-sm"><span class="text-gray-500">// Чтение данных</span>
+GET /api/db?path=users/123&key=YOUR_KEY
+
+<span class="text-gray-500">// Запись данных (только sk_ ключи)</span>
+POST /api/db?path=users/123&key=YOUR_SK_KEY
+Body: { "name": "John", "age": 25 }
+
+<span class="text-gray-500">// Удаление (только sk_ ключи)</span>
+DELETE /api/db?path=users/123&key=YOUR_SK_KEY</pre>
+                            </div>
+                            
+                            <div class="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
+                                <div class="font-semibold text-orange-400 mb-2">⚠️ Типы ключей:</div>
+                                <ul class="text-sm text-gray-300 space-y-1">
+                                    <li><span class="text-green-400">pk_</span> — публичный, только чтение</li>
+                                    <li><span class="text-orange-400">sk_</span> — секретный, полный доступ</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- QR API -->
+                        <div id="doc-qr" class="doc-section hidden">
+                            <h3 class="text-xl font-bold mb-4">📱 QR API - Генерация QR-кодов</h3>
+                            <p class="text-gray-400 mb-4">Создание QR-кодов для любых данных</p>
+                            
+                            <div class="code-block rounded-xl p-4 overflow-x-auto mb-4">
+                                <pre class="mono text-sm"><span class="text-gray-500">// Простой QR-код</span>
+GET /api/qr?data=https://example.com&key=YOUR_KEY
+
+<span class="text-gray-500">// С параметрами</span>
+GET /api/qr?data=Hello&size=300&color=667eea&key=YOUR_KEY</pre>
+                            </div>
+                            
+                            <div class="p-4 bg-indigo-500/10 border border-indigo-500/30 rounded-xl">
+                                <div class="font-semibold text-indigo-400 mb-2">Параметры:</div>
+                                <ul class="text-sm text-gray-300 space-y-1">
+                                    <li><code>data</code> - данные для кодирования</li>
+                                    <li><code>size</code> - размер в пикселях</li>
+                                    <li><code>color</code> - цвет QR-кода (hex)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Crypto -->
+                        <div id="doc-crypto" class="doc-section hidden">
+                            <h3 class="text-xl font-bold mb-4">🔐 Crypto API - Шифрование</h3>
+                            <p class="text-gray-400 mb-4">Хеширование и криптографические операции</p>
+                            
+                            <div class="code-block rounded-xl p-4 overflow-x-auto mb-4">
+                                <pre class="mono text-sm"><span class="text-gray-500">// SHA-256 хеширование</span>
+GET /api/crypto/hash?text=hello&algo=sha256&key=YOUR_KEY
+
+<span class="text-gray-500">// Base64</span>
+GET /api/crypto/base64?text=hello&mode=encode&key=YOUR_KEY
+
+<span class="text-gray-500">// UUID генерация</span>
+GET /api/crypto/uuid?key=YOUR_KEY</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Playground -->
+        <section id="playground" class="py-20 px-4">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center mb-4">🎮 Playground</h2>
+                <p class="text-gray-400 text-center mb-12">Попробуйте API прямо сейчас — без регистрации!</p>
+
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <!-- Text Generation -->
+                    <div class="glass rounded-2xl p-6 sm:p-8">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                            <span class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">🧠</span>
+                            AI Текст
+                        </h3>
+                        <textarea id="aiPrompt" class="w-full h-32 bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Введите ваш запрос..."></textarea>
+                        <select id="aiModel" class="mt-3 w-full bg-black/30 rounded-xl p-3 text-white focus:outline-none">
+                            <option value="openai">OpenAI GPT</option>
+                            <option value="gemini">Google Gemini</option>
+                            <option value="mistral">Mistral</option>
+                            <option value="llama">Llama</option>
+                        </select>
+                        <button onclick="testAI()" id="aiBtn" class="mt-4 w-full py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition flex items-center justify-center gap-2">
+                            <span id="aiBtnText">Сгенерировать</span>
+                            <span id="aiLoader" class="hidden"><svg class="w-5 h-5 spinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></span>
+                        </button>
+                        <div id="aiResult" class="mt-4 p-4 bg-black/30 rounded-xl min-h-[100px] text-gray-300 text-sm hidden whitespace-pre-wrap"></div>
+                    </div>
+
+                    <!-- Image Generation -->
+                    <div class="glass rounded-2xl p-6 sm:p-8">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                            <span class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">🎨</span>
+                            AI Изображения
+                        </h3>
+                        <input type="text" id="imgPrompt" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Опишите изображение...">
+                        <select id="imgModel" class="mt-3 w-full bg-black/30 rounded-xl p-3 text-white focus:outline-none">
+                            <option value="flux">Flux (качество)</option>
+                            <option value="turbo">Turbo (скорость)</option>
+                        </select>
+                        <button onclick="testImage()" id="imgBtn" class="mt-4 w-full py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition flex items-center justify-center gap-2">
+                            <span id="imgBtnText">Создать</span>
+                            <span id="imgLoader" class="hidden"><svg class="w-5 h-5 spinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></span>
+                        </button>
+                        <div id="imgResult" class="mt-4 rounded-xl overflow-hidden hidden">
+                            <img id="generatedImg" class="w-full rounded-xl" alt="">
+                        </div>
+                    </div>
+
+                    <!-- QR Generator -->
+                    <div class="glass rounded-2xl p-6 sm:p-8">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                            <span class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">📱</span>
+                            QR Генератор
+                        </h3>
+                        <input type="text" id="qrData" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Текст или URL...">
+                        <div class="grid grid-cols-2 gap-3 mt-3">
+                            <input type="text" id="qrColor" value="667eea" class="bg-black/30 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none" placeholder="Цвет (hex)">
+                            <input type="number" id="qrSize" value="200" class="bg-black/30 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none" placeholder="Размер">
+                        </div>
+                        <button onclick="testQR()" class="mt-4 w-full py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition">Создать QR</button>
+                        <div id="qrResult" class="mt-4 flex justify-center hidden">
+                            <img id="generatedQR" class="rounded-xl" alt="QR Code">
+                        </div>
+                    </div>
+
+                    <!-- Crypto Tools -->
+                    <div class="glass rounded-2xl p-6 sm:p-8">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                            <span class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">🔐</span>
+                            Crypto Утилиты
+                        </h3>
+                        <input type="text" id="cryptoInput" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Введите текст...">
+                        <div class="grid grid-cols-2 gap-3 mt-3">
+                            <button onclick="testHash('SHA-256')" class="py-3 bg-black/30 rounded-xl hover:bg-white/10 transition text-sm">SHA-256</button>
+                            <button onclick="testHash('SHA-1')" class="py-3 bg-black/30 rounded-xl hover:bg-white/10 transition text-sm">SHA-1</button>
+                            <button onclick="testBase64('encode')" class="py-3 bg-black/30 rounded-xl hover:bg-white/10 transition text-sm">Base64 Encode</button>
+                            <button onclick="testBase64('decode')" class="py-3 bg-black/30 rounded-xl hover:bg-white/10 transition text-sm">Base64 Decode</button>
+                            <button onclick="testUUID()" class="col-span-2 py-3 gradient-bg rounded-xl hover:opacity-90 transition text-sm font-semibold">Генерировать UUID</button>
+                        </div>
+                        <div id="cryptoResult" class="mt-4 p-4 bg-black/30 rounded-xl text-gray-300 text-sm mono break-all hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-12 px-4 border-t border-white/10">
+            <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center font-bold">O</div>
+                    <span class="font-bold">OKAK API</span>
+                </div>
+                <p class="text-gray-500 text-sm">© 2024 OKAK API. Бесплатно навсегда.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden">
+        <div class="flex">
+            <!-- Sidebar -->
+            <aside class="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] glass border-r border-white/10 p-4 hidden lg:block overflow-y-auto z-40">
+                <nav class="space-y-2">
+                    <button onclick="showDash('overview')" class="sidebar-link active w-full text-left px-4 py-3 rounded-xl flex items-center gap-3" data-section="overview">
+                        <span>📊</span> Обзор
+                    </button>
+                    <button onclick="showDash('keys')" class="sidebar-link w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-gray-400" data-section="keys">
+                        <span>🔑</span> API Ключи
+                    </button>
+                    <button onclick="showDash('projects')" class="sidebar-link w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-gray-400" data-section="projects">
+                        <span>📁</span> Проекты
+                    </button>
+                    <button onclick="showDash('database')" class="sidebar-link w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-gray-400" data-section="database">
+                        <span>🗄️</span> База данных
+                    </button>
+                    <button onclick="showDash('play')" class="sidebar-link w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-gray-400" data-section="play">
+                        <span>🎮</span> Playground
+                    </button>
+                    <button onclick="showDash('docs')" class="sidebar-link w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-gray-400" data-section="docs">
+                        <span>📚</span> Документация
+                    </button>
+                    <button onclick="showDash('settings')" class="sidebar-link w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-gray-400" data-section="settings">
+                        <span>⚙️</span> Настройки
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Mobile nav -->
+            <div class="lg:hidden fixed top-16 left-0 right-0 glass border-b border-white/10 p-2 flex gap-2 overflow-x-auto z-40">
+                <button onclick="showDash('overview')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap bg-purple-500/20" data-section="overview">📊</button>
+                <button onclick="showDash('keys')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap text-gray-400" data-section="keys">🔑</button>
+                <button onclick="showDash('projects')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap text-gray-400" data-section="projects">📁</button>
+                <button onclick="showDash('database')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap text-gray-400" data-section="database">🗄️</button>
+                <button onclick="showDash('play')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap text-gray-400" data-section="play">🎮</button>
+                <button onclick="showDash('docs')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap text-gray-400" data-section="docs">📚</button>
+                <button onclick="showDash('settings')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap text-gray-400" data-section="settings">⚙️</button>
+            </div>
+
+            <!-- Main -->
+            <main class="flex-1 lg:ml-64 dashboard-content px-4 sm:px-6 pb-20 min-h-screen">
+                <div class="max-w-5xl mx-auto pt-6">
+                    
+                    <!-- Overview -->
+                    <section id="dash-overview" class="dash-section">
+                        <div class="mb-8">
+                            <h1 class="text-2xl sm:text-3xl font-bold">Привет, <span id="userName">Разработчик</span>! 👋</h1>
+                            <p class="text-gray-400 mt-1">Добро пожаловать в панель управления</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                            <div class="glass rounded-2xl p-5">
+                                <div class="text-gray-400 text-sm mb-1">Сегодня</div>
+                                <div class="text-2xl font-bold" id="statToday">0</div>
+                            </div>
+                            <div class="glass rounded-2xl p-5">
+                                <div class="text-gray-400 text-sm mb-1">Всего</div>
+                                <div class="text-2xl font-bold" id="statTotal">0</div>
+                            </div>
+                            <div class="glass rounded-2xl p-5">
+                                <div class="text-gray-400 text-sm mb-1">Ключей</div>
+                                <div class="text-2xl font-bold" id="statKeys">0</div>
+                            </div>
+                            <div class="glass rounded-2xl p-5">
+                                <div class="text-gray-400 text-sm mb-1">Проектов</div>
+                                <div class="text-2xl font-bold" id="statProjects">0</div>
+                            </div>
+                        </div>
+
+                        <div class="grid lg:grid-cols-2 gap-6">
+                            <div class="glass rounded-2xl p-6">
+                                <h3 class="text-lg font-bold mb-4">📈 Активность (7 дней)</h3>
+                                <div class="h-32 flex items-end gap-2" id="chart"></div>
+                            </div>
+                            <div class="glass rounded-2xl p-6">
+                                <h3 class="text-lg font-bold mb-4">🚀 Быстрые действия</h3>
+                                <div class="space-y-3">
+                                    <button onclick="showDash('keys'); setTimeout(openKeyModal, 100)" class="w-full p-4 bg-purple-500/10 hover:bg-purple-500/20 rounded-xl text-left transition flex items-center gap-3">
+                                        <span class="text-2xl">🔑</span>
+                                        <div>
+                                            <div class="font-semibold">Создать API ключ</div>
+                                            <div class="text-sm text-gray-400">Новый ключ для проекта</div>
+                                        </div>
+                                    </button>
+                                    <button onclick="showDash('play')" class="w-full p-4 bg-blue-500/10 hover:bg-blue-500/20 rounded-xl text-left transition flex items-center gap-3">
+                                        <span class="text-2xl">🎮</span>
+                                        <div>
+                                            <div class="font-semibold">Playground</div>
+                                            <div class="text-sm text-gray-400">Тестирование API</div>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Keys -->
+                    <section id="dash-keys" class="dash-section hidden">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <div>
+                                <h2 class="text-2xl font-bold">🔑 API Ключи</h2>
+                                <p class="text-gray-400 text-sm">Управление ключами доступа</p>
+                            </div>
+                            <button onclick="openKeyModal()" class="px-6 py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition">+ Создать ключ</button>
+                        </div>
+                        <div id="keysList" class="space-y-4"></div>
+                        <div id="noKeys" class="text-center text-gray-400 py-12 glass rounded-2xl hidden">
+                            <div class="text-4xl mb-4">🔑</div>
+                            <div>У вас пока нет API ключей</div>
+                            <button onclick="openKeyModal()" class="mt-4 px-6 py-2 gradient-bg rounded-xl text-sm font-semibold">Создать первый ключ</button>
+                        </div>
+                    </section>
+
+                    <!-- Projects -->
+                    <section id="dash-projects" class="dash-section hidden">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <div>
+                                <h2 class="text-2xl font-bold">📁 Проекты</h2>
+                                <p class="text-gray-400 text-sm">Ваши проекты и приложения</p>
+                            </div>
+                            <button onclick="openProjModal()" class="px-6 py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition">+ Новый проект</button>
+                        </div>
+                        <div id="projList" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                        <div id="noProj" class="text-center text-gray-400 py-12 glass rounded-2xl hidden">
+                            <div class="text-4xl mb-4">📁</div>
+                            <div>У вас пока нет проектов</div>
+                            <button onclick="openProjModal()" class="mt-4 px-6 py-2 gradient-bg rounded-xl text-sm font-semibold">Создать проект</button>
+                        </div>
+                    </section>
+
+                    <!-- Database -->
+                    <section id="dash-database" class="dash-section hidden">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold">🗄️ База данных</h2>
+                            <p class="text-gray-400 text-sm">Управление данными</p>
+                        </div>
+
+                        <div class="glass rounded-2xl p-6 mb-6">
+                            <div class="grid md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="text-gray-400 text-sm mb-2 block">Путь</label>
+                                    <input type="text" id="dbPath" placeholder="users/123" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                                <div>
+                                    <label class="text-gray-400 text-sm mb-2 block">Данные (JSON)</label>
+                                    <input type="text" id="dbData" placeholder='{"name": "John"}' class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <button onclick="dbRead()" class="flex-1 sm:flex-none px-6 py-3 glass rounded-xl hover:bg-white/10 transition font-semibold">📖 Читать</button>
+                                <button onclick="dbWrite()" class="flex-1 sm:flex-none px-6 py-3 gradient-bg rounded-xl hover:opacity-90 transition font-semibold">✏️ Записать</button>
+                                <button onclick="dbDelete()" class="flex-1 sm:flex-none px-6 py-3 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition font-semibold">🗑️ Удалить</button>
+                            </div>
+                            <div id="dbResult" class="mt-4 p-4 code-block rounded-xl hidden">
+                                <pre id="dbResultPre" class="mono text-sm whitespace-pre-wrap break-all"></pre>
+                            </div>
+                        </div>
+
+                        <div class="glass rounded-2xl p-6">
+                            <h3 class="text-lg font-bold mb-4">📂 Ваши данные</h3>
+                            <div id="dbTree" class="code-block rounded-xl p-4 mono text-sm max-h-96 overflow-auto">
+                                <div class="text-gray-500">Загрузка...</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Playground -->
+                    <section id="dash-play" class="dash-section hidden">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold">🎮 Playground</h2>
+                            <p class="text-gray-400 text-sm">Тестируйте API в реальном времени</p>
+                        </div>
+
+                        <div class="grid lg:grid-cols-2 gap-6">
+                            <div class="glass rounded-2xl p-6">
+                                <h3 class="text-lg font-bold mb-4">🧠 AI Текст</h3>
+                                <textarea id="dAiPrompt" class="w-full h-28 bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 resize-none focus:outline-none" placeholder="Спросите что-нибудь..."></textarea>
+                                <select id="dAiModel" class="mt-3 w-full bg-black/30 rounded-xl p-3 text-white">
+                                    <option value="openai">OpenAI</option>
+                                    <option value="gemini">Gemini</option>
+                                    <option value="mistral">Mistral</option>
+                                </select>
+                                <button onclick="dTestAI()" id="dAiBtn" class="mt-4 w-full py-3 gradient-bg rounded-xl font-semibold">Генерировать</button>
+                                <div id="dAiResult" class="mt-4 p-4 bg-black/30 rounded-xl text-sm hidden whitespace-pre-wrap max-h-60 overflow-auto"></div>
+                            </div>
+
+                            <div class="glass rounded-2xl p-6">
+                                <h3 class="text-lg font-bold mb-4">🎨 AI Изображения</h3>
+                                <input type="text" id="dImgPrompt" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none" placeholder="Опишите изображение...">
+                                <select id="dImgModel" class="mt-3 w-full bg-black/30 rounded-xl p-3 text-white">
+                                    <option value="flux">Flux</option>
+                                    <option value="turbo">Turbo</option>
+                                </select>
+                                <button onclick="dTestImg()" id="dImgBtn" class="mt-4 w-full py-3 gradient-bg rounded-xl font-semibold">Создать</button>
+                                <div id="dImgResult" class="mt-4 hidden">
+                                    <img id="dGenImg" class="w-full rounded-xl" alt="">
+                                </div>
+                            </div>
+
+                            <div class="glass rounded-2xl p-6">
+                                <h3 class="text-lg font-bold mb-4">📱 QR Генератор</h3>
+                                <input type="text" id="dQrData" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none" placeholder="URL или текст">
+                                <button onclick="dTestQR()" class="mt-4 w-full py-3 gradient-bg rounded-xl font-semibold">Создать QR</button>
+                                <div id="dQrResult" class="mt-4 flex justify-center hidden">
+                                    <img id="dGenQR" class="rounded-xl" alt="">
+                                </div>
+                            </div>
+
+                            <div class="glass rounded-2xl p-6">
+                                <h3 class="text-lg font-bold mb-4">🔐 Crypto</h3>
+                                <input type="text" id="dCryptoIn" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none" placeholder="Текст">
+                                <div class="grid grid-cols-2 gap-2 mt-3">
+                                    <button onclick="dHash('SHA-256')" class="py-2 bg-black/30 rounded-xl hover:bg-white/10 transition text-sm">SHA-256</button>
+                                    <button onclick="dHash('SHA-1')" class="py-2 bg-black/30 rounded-xl hover:bg-white/10 transition text-sm">SHA-1</button>
+                                    <button onclick="dB64('encode')" class="py-2 bg-black/30 rounded-xl hover:bg-white/10 transition text-sm">Base64 Enc</button>
+                                    <button onclick="dB64('decode')" class="py-2 bg-black/30 rounded-xl hover:bg-white/10 transition text-sm">Base64 Dec</button>
+                                </div>
+                                <button onclick="dUUID()" class="mt-2 w-full py-2 gradient-bg rounded-xl font-semibold text-sm">UUID</button>
+                                <div id="dCryptoRes" class="mt-4 p-4 bg-black/30 rounded-xl text-sm mono break-all hidden"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Docs -->
+                    <section id="dash-docs" class="dash-section hidden">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold">📚 Документация</h2>
+                            <p class="text-gray-400 text-sm">Полное руководство по API</p>
+                        </div>
+
+                        <div class="glass rounded-2xl p-6">
+                            <div class="flex flex-wrap gap-2 mb-6 border-b border-white/10 pb-4">
+                                <button onclick="showDocsTab('intro')" class="docs-tab px-4 py-2 rounded-lg text-sm tab-active" data-tab="intro">Введение</button>
+                                <button onclick="showDocsTab('auth')" class="docs-tab px-4 py-2 rounded-lg text-sm text-gray-400" data-tab="auth">Аутентификация</button>
+                                <button onclick="showDocsTab('endpoints')" class="docs-tab px-4 py-2 rounded-lg text-sm text-gray-400" data-tab="endpoints">Endpoints</button>
+                                <button onclick="showDocsTab('errors')" class="docs-tab px-4 py-2 rounded-lg text-sm text-gray-400" data-tab="errors">Ошибки</button>
+                                <button onclick="showDocsTab('examples')" class="docs-tab px-4 py-2 rounded-lg text-sm text-gray-400" data-tab="examples">Примеры</button>
+                            </div>
+
+                            <div id="docsContent">
+                                <div id="docs-intro" class="docs-sec">
+                                    <h3 class="text-xl font-bold mb-4">🚀 Введение</h3>
+                                    <p class="text-gray-300 mb-4">OKAK API — бесплатная платформа с набором мощных API для разработчиков.</p>
+                                    
+                                    <h4 class="font-bold mt-6 mb-3">Доступные сервисы:</h4>
+                                    <ul class="space-y-2 text-gray-300">
+                                        <li>🧠 <strong>AI API</strong> — генерация текста</li>
+                                        <li>🎨 <strong>Image API</strong> — создание изображений</li>
+                                        <li>🗄️ <strong>Database</strong> — облачная БД</li>
+                                        <li>📱 <strong>QR API</strong> — QR-коды</li>
+                                        <li>🔐 <strong>Crypto</strong> — хеширование</li>
+                                    </ul>
+
+                                    <h4 class="font-bold mt-6 mb-3">Базовый URL:</h4>
+                                    <div class="code-block rounded-xl p-4 mono text-sm">
+https://YOUR_USERNAME.github.io/api/
+                                    </div>
+                                </div>
+
+                                <div id="docs-auth" class="docs-sec hidden">
+                                    <h3 class="text-xl font-bold mb-4">🔐 Аутентификация</h3>
+                                    
+                                    <div class="space-y-4">
+                                        <div class="p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+                                            <div class="font-bold text-green-400 mb-2">🌐 Публичный ключ (pk_)</div>
+                                            <ul class="text-sm text-gray-300 space-y-1">
+                                                <li>• Безопасен для клиентского кода</li>
+                                                <li>• Только чтение данных</li>
+                                                <li>• Можно публиковать</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <div class="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
+                                            <div class="font-bold text-orange-400 mb-2">🔒 Секретный ключ (sk_)</div>
+                                            <ul class="text-sm text-gray-300 space-y-1">
+                                                <li>• ТОЛЬКО для сервера</li>
+                                                <li>• Полный доступ (read/write/delete)</li>
+                                                <li>• НИКОГДА не публикуйте!</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <h4 class="font-bold mt-6 mb-3">Использование:</h4>
+                                    <div class="code-block rounded-xl p-4 mono text-sm">
+// В параметре запроса
+?key=YOUR_API_KEY
+
+// Или в заголовке
+Authorization: Bearer YOUR_API_KEY
+                                    </div>
+                                </div>
+
+                                <div id="docs-endpoints" class="docs-sec hidden">
+                                    <h3 class="text-xl font-bold mb-4">📡 API Endpoints</h3>
+                                    
+                                    <div class="space-y-6">
+                                        <div>
+                                            <h4 class="font-bold mb-2 flex items-center gap-2">
+                                                <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">GET</span>
+                                                /api/ai
+                                            </h4>
+                                            <p class="text-gray-400 text-sm mb-2">Генерация текста</p>
+                                            <div class="code-block rounded-xl p-3 mono text-xs">
+?prompt=Hello&model=openai&key=YOUR_KEY
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold mb-2 flex items-center gap-2">
+                                                <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">GET</span>
+                                                /api/image
+                                            </h4>
+                                            <p class="text-gray-400 text-sm mb-2">Генерация изображений</p>
+                                            <div class="code-block rounded-xl p-3 mono text-xs">
+?prompt=cat&model=flux&width=512&height=512&key=YOUR_KEY
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold mb-2 flex items-center gap-2">
+                                                <span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">GET/POST/DELETE</span>
+                                                /api/db
+                                            </h4>
+                                            <p class="text-gray-400 text-sm mb-2">База данных</p>
+                                            <div class="code-block rounded-xl p-3 mono text-xs">
+GET ?path=users/123&key=YOUR_KEY
+POST ?path=users/123&key=YOUR_SK_KEY (body: JSON)
+DELETE ?path=users/123&key=YOUR_SK_KEY
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold mb-2 flex items-center gap-2">
+                                                <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">GET</span>
+                                                /api/qr
+                                            </h4>
+                                            <p class="text-gray-400 text-sm mb-2">QR-коды</p>
+                                            <div class="code-block rounded-xl p-3 mono text-xs">
+?data=https://example.com&size=200&color=667eea&key=YOUR_KEY
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="docs-errors" class="docs-sec hidden">
+                                    <h3 class="text-xl font-bold mb-4">❌ Коды ошибок</h3>
+                                    
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-sm">
+                                            <thead>
+                                                <tr class="text-left text-gray-400 border-b border-white/10">
+                                                    <th class="pb-3 pr-4">Код</th>
+                                                    <th class="pb-3 pr-4">Статус</th>
+                                                    <th class="pb-3">Описание</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="text-gray-300">
+                                                <tr class="border-b border-white/5">
+                                                    <td class="py-3 pr-4 mono text-red-400">400</td>
+                                                    <td class="py-3 pr-4">Bad Request</td>
+                                                    <td class="py-3">Неверные параметры</td>
+                                                </tr>
+                                                <tr class="border-b border-white/5">
+                                                    <td class="py-3 pr-4 mono text-red-400">401</td>
+                                                    <td class="py-3 pr-4">Unauthorized</td>
+                                                    <td class="py-3">Неверный API ключ</td>
+                                                </tr>
+                                                <tr class="border-b border-white/5">
+                                                    <td class="py-3 pr-4 mono text-red-400">403</td>
+                                                    <td class="py-3 pr-4">Forbidden</td>
+                                                    <td class="py-3">Нет прав (pk_ для записи)</td>
+                                                </tr>
+                                                <tr class="border-b border-white/5">
+                                                    <td class="py-3 pr-4 mono text-red-400">404</td>
+                                                    <td class="py-3 pr-4">Not Found</td>
+                                                    <td class="py-3">Ресурс не найден</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-3 pr-4 mono text-red-400">500</td>
+                                                    <td class="py-3 pr-4">Server Error</td>
+                                                    <td class="py-3">Ошибка сервера</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div id="docs-examples" class="docs-sec hidden">
+                                    <h3 class="text-xl font-bold mb-4">💡 Примеры кода</h3>
+                                    
+                                    <div class="space-y-6">
+                                        <div>
+                                            <h4 class="font-bold mb-2">JavaScript (fetch)</h4>
+                                            <div class="code-block rounded-xl p-4 mono text-sm overflow-x-auto">
+<pre>// AI генерация
+const res = await fetch('/api/ai?prompt=Hello&key=YOUR_KEY');
+const data = await res.json();
+console.log(data.text);
+
+// Изображение
+const img = document.createElement('img');
+img.src = '/api/image?prompt=cat&key=YOUR_KEY';
+
+// База данных
+await fetch('/api/db?path=users/1&key=YOUR_SK_KEY', {
+  method: 'POST',
+  body: JSON.stringify({ name: 'John' })
+});</pre>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold mb-2">Python (requests)</h4>
+                                            <div class="code-block rounded-xl p-4 mono text-sm overflow-x-auto">
+<pre>import requests
+
+# AI
+res = requests.get('/api/ai', params={
+    'prompt': 'Hello',
+    'key': 'YOUR_KEY'
+})
+print(res.json()['text'])</pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Settings -->
+                    <section id="dash-settings" class="dash-section hidden">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold">⚙️ Настройки</h2>
+                            <p class="text-gray-400 text-sm">Управление аккаунтом</p>
+                        </div>
+
+                        <div class="glass rounded-2xl p-6 mb-6">
+                            <h3 class="text-lg font-bold mb-4">👤 Профиль</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-gray-400 text-sm mb-2 block">Имя</label>
+                                    <input type="text" id="setName" class="w-full bg-black/30 rounded-xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                                <div>
+                                    <label class="text-gray-400 text-sm mb-2 block">Email</label>
+                                    <input type="email" id="setEmail" class="w-full bg-black/30 rounded-xl p-4 text-white focus:outline-none" disabled>
+                                </div>
+                                <button onclick="saveProfile()" class="px-6 py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition">Сохранить</button>
+                            </div>
+                        </div>
+
+                        <div class="glass rounded-2xl p-6">
+                            <h3 class="text-lg font-bold mb-4 text-red-400">⚠️ Опасная зона</h3>
+                            <button onclick="deleteAccount()" class="px-6 py-3 bg-red-500/20 text-red-400 rounded-xl font-semibold hover:bg-red-500/30 transition">Удалить аккаунт</button>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="fixed inset-0 bg-black/80 z-[1001] flex items-center justify-center p-4 hidden">
+        <div class="glass rounded-2xl p-8 max-w-md w-full relative fade-in">
+            <button onclick="closeModal('authModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            
+            <div id="loginForm">
+                <h2 class="text-2xl font-bold mb-2">Добро пожаловать!</h2>
+                <p class="text-gray-400 text-sm mb-6">Войдите в аккаунт</p>
+                
+                <input type="email" id="loginEmail" placeholder="Email" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <input type="password" id="loginPassword" placeholder="Пароль" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 mb-6 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                
+                <button onclick="login()" id="loginBtn" class="w-full py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition">Войти</button>
+                
+                <p class="text-center mt-6 text-gray-400 text-sm">
+                    Нет аккаунта? <button onclick="showAuth('register')" class="text-purple-400 hover:text-purple-300">Регистрация</button>
+                </p>
+            </div>
+
+            <div id="registerForm" class="hidden">
+                <h2 class="text-2xl font-bold mb-2">Создать аккаунт</h2>
+                <p class="text-gray-400 text-sm mb-6">Бесплатно навсегда</p>
+                
+                <input type="text" id="regName" placeholder="Ваше имя" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <input type="email" id="regEmail" placeholder="Email" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <input type="password" id="regPassword" placeholder="Пароль (мин. 6 символов)" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 mb-6 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                
+                <button onclick="register()" id="regBtn" class="w-full py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition">Зарегистрироваться</button>
+                
+                <p class="text-center mt-6 text-gray-400 text-sm">
+                    Уже есть аккаунт? <button onclick="showAuth('login')" class="text-purple-400 hover:text-purple-300">Войти</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Modal -->
+    <div id="keyModal" class="fixed inset-0 bg-black/80 z-[1001] flex items-center justify-center p-4 hidden overflow-y-auto">
+        <div class="glass rounded-2xl p-6 sm:p-8 max-w-lg w-full relative fade-in my-8">
+            <button onclick="closeModal('keyModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            
+            <h2 class="text-2xl font-bold mb-6">🔑 Создать API ключ</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-gray-400 text-sm mb-2 block">Название</label>
+                    <input type="text" id="keyName" placeholder="Мой проект" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+
+                <div>
+                    <label class="text-gray-400 text-sm mb-2 block">Тип ключа</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="selectKeyType('public')" id="ktPublic" class="kt-btn p-4 rounded-xl border-2 border-green-500 bg-green-500/10 text-left">
+                            <div class="font-bold text-green-400">🌐 Публичный</div>
+                            <div class="text-xs text-gray-400 mt-1">pk_ • Только чтение</div>
+                        </button>
+                        <button onclick="selectKeyType('secret')" id="ktSecret" class="kt-btn p-4 rounded-xl border-2 border-gray-700 text-left hover:border-gray-600">
+                            <div class="font-bold text-orange-400">🔒 Секретный</div>
+                            <div class="text-xs text-gray-400 mt-1">sk_ • Полный доступ</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="secretWarn" class="hidden p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+                    <div class="font-bold text-red-400 mb-2">⚠️ ВАЖНО!</div>
+                    <ul class="text-sm text-gray-300 space-y-1">
+                        <li>• Никогда не публикуйте секретный ключ</li>
+                        <li>• Не используйте в клиентском коде</li>
+                        <li>• При утечке — немедленно удалите</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <label class="text-gray-400 text-sm mb-2 block">Назначение</label>
+                    <select id="keyPurpose" class="w-full bg-black/30 rounded-xl p-4 text-white focus:outline-none">
+                        <option value="general">🎯 Общее использование</option>
+                        <option value="ai">🧠 AI генерация</option>
+                        <option value="database">🗄️ База данных</option>
+                        <option value="images">🎨 Изображения</option>
+                        <option value="testing">🧪 Тестирование</option>
+                    </select>
+                </div>
+
+                <div id="permsBlock">
+                    <label class="text-gray-400 text-sm mb-2 block">Разрешения</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3 p-3 bg-black/30 rounded-xl cursor-pointer">
+                            <input type="checkbox" id="permRead" checked disabled class="w-4 h-4 accent-purple-500">
+                            <span>📖 Чтение данных</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-black/30 rounded-xl cursor-pointer perm-wr">
+                            <input type="checkbox" id="permWrite" disabled class="w-4 h-4 accent-purple-500">
+                            <span class="text-gray-500">✏️ Запись данных</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-black/30 rounded-xl cursor-pointer perm-del">
+                            <input type="checkbox" id="permDelete" disabled class="w-4 h-4 accent-purple-500">
+                            <span class="text-gray-500">🗑️ Удаление данных</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-black/30 rounded-xl cursor-pointer">
+                            <input type="checkbox" id="permAI" checked class="w-4 h-4 accent-purple-500">
+                            <span>🧠 AI функции</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-gray-400 text-sm mb-2 block">Домен (опционально)</label>
+                    <input type="text" id="keyDomain" placeholder="example.com" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <p class="text-xs text-gray-500 mt-1">Ограничить использование только этим доменом</p>
+                </div>
+
+                <div>
+                    <label class="text-gray-400 text-sm mb-2 block">Срок действия</label>
+                    <select id="keyExpiry" class="w-full bg-black/30 rounded-xl p-4 text-white focus:outline-none">
+                        <option value="never">♾️ Бессрочно</option>
+                        <option value="30">30 дней</option>
+                        <option value="90">90 дней</option>
+                        <option value="365">1 год</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button onclick="createKey()" class="w-full mt-6 py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition">Создать ключ</button>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="projModal" class="fixed inset-0 bg-black/80 z-[1001] flex items-center justify-center p-4 hidden">
+        <div class="glass rounded-2xl p-8 max-w-md w-full relative fade-in">
+            <button onclick="closeModal('projModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            
+            <h2 class="text-2xl font-bold mb-6">📁 Новый проект</h2>
+            
+            <input type="text" id="projName" placeholder="Название проекта" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <input type="text" id="projDomain" placeholder="Домен (example.com)" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <textarea id="projDesc" placeholder="Описание (опционально)" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 mb-3 focus:outline-none resize-none h-20"></textarea>
+            <select id="projKey" class="w-full bg-black/30 rounded-xl p-4 text-white mb-6 focus:outline-none">
+                <option value="">Привязать API ключ (опционально)</option>
+            </select>
+            
+            <button onclick="createProj()" class="w-full py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition">Создать проект</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-300 z-[1002]">
+        <div class="glass rounded-xl px-6 py-4 flex items-center gap-3">
+            <span id="toastIcon">✅</span>
+            <span id="toastMsg">Успешно!</span>
+        </div>
+    </div>
+
+    <!-- API Module (скрывает реальные endpoints) -->
+    <script src="api.js"></script>
+    
+    <script>
+        // Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAQe5UUx7HkkF98Lo-j0KCufdPmQzzZySs",
+            authDomain: "tanchiki-45b4e.firebaseapp.com",
+            databaseURL: "https://tanchiki-45b4e-default-rtdb.firebaseio.com",
+            projectId: "tanchiki-45b4e",
+            storageBucket: "tanchiki-45b4e.firebasestorage.app",
+            messagingSenderId: "152159817482",
+            appId: "1:152159817482:web:0957e2ed0d16628433f4f3"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // State
+        let user = null;
+        let keys = [];
+        let projects = [];
+        let keyType = 'public';
+
+        // Helpers
+        const $ = id => document.getElementById(id);
+        const show = el => el?.classList.remove('hidden');
+        const hide = el => el?.classList.add('hidden');
+        
+        function toast(msg, err = false) {
+            $('toastIcon').textContent = err ? '❌' : '✅';
+            $('toastMsg').textContent = msg;
+            const t = $('toast');
+            t.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 3000);
+        }
+
+        function genId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+        }
+
+        function genKey(type) {
+            const prefix = type === 'secret' ? 'sk_' : 'pk_';
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let key = prefix;
+            for (let i = 0; i < 32; i++) key += chars[Math.floor(Math.random() * chars.length)];
+            return key;
+        }
+
+        async function hashPwd(pwd) {
+            const data = new TextEncoder().encode(pwd + 'okak_2024');
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Navigation
+        function goHome() {
+            if (user) {
+                showDash('overview');
+            } else {
+                hide($('dashboard'));
+                show($('guestPage'));
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function updateNav() {
+            if (user) {
+                $('navButtons').innerHTML = `
+                    <span class="text-gray-400 text-sm hidden sm:inline mr-2">${user.email}</span>
+                    <button onclick="logout()" class="px-4 py-2 glass rounded-xl hover:bg-white/10 transition text-sm">Выйти</button>
+                `;
+                hide($('navLinks'));
+            } else {
+                $('navButtons').innerHTML = `
+                    <button onclick="showAuth('login')" class="px-4 py-2 text-gray-300 hover:text-white transition text-sm">Войти</button>
+                    <button onclick="showAuth('register')" class="px-5 py-2 gradient-bg rounded-xl font-medium hover:opacity-90 transition text-sm">Регистрация</button>
+                `;
+                show($('navLinks'));
+            }
+        }
+
+        // Modal helpers
+        function closeModal(id) { hide($(id)); }
+        function openModal(id) { show($(id)); }
+
+        // Auth
+        function showAuth(type) {
+            openModal('authModal');
+            if (type === 'login') {
+                show($('loginForm'));
+                hide($('registerForm'));
+            } else {
+                hide($('loginForm'));
+                show($('registerForm'));
+            }
+        }
+
+        async function register() {
+            const name = $('regName').value.trim();
+            const email = $('regEmail').value.trim();
+            const pwd = $('regPassword').value;
+
+            if (!name || !email || !pwd) return toast('Заполните все поля', true);
+            if (pwd.length < 6) return toast('Пароль минимум 6 символов', true);
+            if (!email.includes('@')) return toast('Неверный email', true);
+
+            $('regBtn').disabled = true;
+            $('regBtn').textContent = 'Создание...';
+
+            try {
+                const snap = await db.ref('okak_users').orderByChild('email').equalTo(email).once('value');
+                if (snap.exists()) {
+                    toast('Email уже занят', true);
+                    $('regBtn').disabled = false;
+                    $('regBtn').textContent = 'Зарегистрироваться';
+                    return;
+                }
+
+                const id = genId();
+                const userData = {
+                    id, name, email,
+                    password: await hashPwd(pwd),
+                    createdAt: Date.now(),
+                    totalReqs: 0,
+                    todayReqs: 0,
+                    lastDate: new Date().toDateString()
+                };
+
+                await db.ref('okak_users/' + id).set(userData);
+                user = userData;
+                localStorage.setItem('okak_uid', id);
+                closeModal('authModal');
+                showDashboard();
+                toast('Аккаунт создан!');
+            } catch (e) {
+                toast('Ошибка регистрации', true);
+            }
+
+            $('regBtn').disabled = false;
+            $('regBtn').textContent = 'Зарегистрироваться';
+        }
+
+        async function login() {
+            const email = $('loginEmail').value.trim();
+            const pwd = $('loginPassword').value;
+
+            if (!email || !pwd) return toast('Заполните все поля', true);
+
+            $('loginBtn').disabled = true;
+            $('loginBtn').textContent = 'Вход...';
+
+            try {
+                const hash = await hashPwd(pwd);
+                const snap = await db.ref('okak_users').orderByChild('email').equalTo(email).once('value');
+                
+                if (!snap.exists()) {
+                    toast('Пользователь не найден', true);
+                    $('loginBtn').disabled = false;
+                    $('loginBtn').textContent = 'Войти';
+                    return;
+                }
+
+                let found = null;
+                snap.forEach(child => {
+                    if (child.val().password === hash) found = child.val();
+                });
+
+                if (!found) {
+                    toast('Неверный пароль', true);
+                    $('loginBtn').disabled = false;
+                    $('loginBtn').textContent = 'Войти';
+                    return;
+                }
+
+                user = found;
+                localStorage.setItem('okak_uid', found.id);
+                closeModal('authModal');
+                showDashboard();
+                toast('Добро пожаловать!');
+            } catch (e) {
+                toast('Ошибка входа', true);
+            }
+
+            $('loginBtn').disabled = false;
+            $('loginBtn').textContent = 'Войти';
+        }
+
+        function logout() {
+            user = null;
+            localStorage.removeItem('okak_uid');
+            hide($('dashboard'));
+            show($('guestPage'));
+            updateNav();
+            toast('Вы вышли');
+        }
+
+        // Dashboard
+        function showDashboard() {
+            hide($('guestPage'));
+            show($('dashboard'));
+            updateNav();
+            $('userName').textContent = user.name;
+            $('setName').value = user.name;
+            $('setEmail').value = user.email;
+            loadData();
+        }
+
+        async function loadData() {
+            await Promise.all([loadKeys(), loadProjects(), loadStats()]);
+            renderChart();
+            loadDbTree();
+        }
+
+        async function loadStats() {
+            const today = new Date().toDateString();
+            if (user.lastDate !== today) {
+                user.todayReqs = 0;
+                user.lastDate = today;
+                await db.ref('okak_users/' + user.id).update({ todayReqs: 0, lastDate: today });
+            }
+            $('statToday').textContent = user.todayReqs || 0;
+            $('statTotal').textContent = user.totalReqs || 0;
+        }
+
+        async function incReqs() {
+            user.todayReqs = (user.todayReqs || 0) + 1;
+            user.totalReqs = (user.totalReqs || 0) + 1;
+            await db.ref('okak_users/' + user.id).update({
+                todayReqs: user.todayReqs,
+                totalReqs: user.totalReqs
+            });
+            loadStats();
+        }
+
+        function renderChart() {
+            const c = $('chart');
+            c.innerHTML = '';
+            for (let i = 0; i < 7; i++) {
+                const h = Math.floor(Math.random() * 100) + 20;
+                const bar = document.createElement('div');
+                bar.className = 'flex-1 gradient-bg rounded-t transition-all hover:opacity-80';
+                bar.style.height = h + 'px';
+                bar.title = Math.floor(h * 2) + ' запросов';
+                c.appendChild(bar);
+            }
+        }
+
+        // Dashboard sections
+        function showDash(section) {
+            document.querySelectorAll('.dash-section').forEach(s => hide(s));
+            show($('dash-' + section));
+            
+            document.querySelectorAll('.sidebar-link').forEach(l => {
+                l.classList.remove('active');
+                l.classList.add('text-gray-400');
+            });
+            document.querySelector(`.sidebar-link[data-section="${section}"]`)?.classList.add('active');
+            document.querySelector(`.sidebar-link[data-section="${section}"]`)?.classList.remove('text-gray-400');
+            
+            document.querySelectorAll('.mob-nav').forEach(b => {
+                b.classList.remove('bg-purple-500/20');
+                b.classList.add('text-gray-400');
+            });
+            document.querySelector(`.mob-nav[data-section="${section}"]`)?.classList.add('bg-purple-500/20');
+            document.querySelector(`.mob-nav[data-section="${section}"]`)?.classList.remove('text-gray-400');
+        }
+
+        // API Keys
+        async function loadKeys() {
+            const snap = await db.ref('okak_keys').orderByChild('userId').equalTo(user.id).once('value');
+            keys = [];
+            snap.forEach(child => keys.push(child.val()));
+            renderKeys();
+            $('statKeys').textContent = keys.length;
+        }
+
+        function renderKeys() {
+            const list = $('keysList');
+            if (keys.length === 0) {
+                list.innerHTML = '';
+                show($('noKeys'));
+                return;
+            }
+            hide($('noKeys'));
+            list.innerHTML = keys.map(k => `
+                <div class="glass rounded-xl p-4 sm:p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap mb-2">
+                                <span class="font-bold">${k.name}</span>
+                                <span class="px-2 py-0.5 rounded text-xs ${k.type === 'secret' ? 'bg-orange-500/20 text-orange-400' : 'bg-green-500/20 text-green-400'}">
+                                    ${k.type === 'secret' ? '🔒 Секретный' : '🌐 Публичный'}
+                                </span>
+                                <span class="px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded text-xs">${k.purpose || 'general'}</span>
+                            </div>
+                            <div class="mono text-sm text-gray-400 break-all">${k.key}</div>
+                            <div class="text-xs text-gray-500 mt-2">
+                                Создан: ${new Date(k.createdAt).toLocaleDateString('ru')}
+                                ${k.domain ? ' • ' + k.domain : ''}
+                                ${k.expiry && k.expiry !== 'never' ? ' • Истекает через ' + k.expiry + ' дней' : ''}
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="copyKey('${k.key}')" class="px-4 py-2 glass rounded-lg hover:bg-white/10 transition text-sm">📋</button>
+                            <button onclick="deleteKey('${k.id}')" class="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition text-sm">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openKeyModal() {
+            openModal('keyModal');
+            keyType = 'public';
+            updateKeyTypeUI();
+            $('keyName').value = '';
+            $('keyDomain').value = '';
+        }
+
+        function selectKeyType(type) {
+            keyType = type;
+            updateKeyTypeUI();
+        }
+
+        function updateKeyTypeUI() {
+            const isSecret = keyType === 'secret';
+            $('ktPublic').className = `kt-btn p-4 rounded-xl border-2 text-left ${!isSecret ? 'border-green-500 bg-green-500/10' : 'border-gray-700 hover:border-gray-600'}`;
+            $('ktSecret').className = `kt-btn p-4 rounded-xl border-2 text-left ${isSecret ? 'border-orange-500 bg-orange-500/10' : 'border-gray-700 hover:border-gray-600'}`;
+            
+            if (isSecret) {
+                show($('secretWarn'));
+                $('permWrite').disabled = false;
+                $('permWrite').checked = true;
+                $('permDelete').disabled = false;
+                $('permDelete').checked = true;
+                document.querySelectorAll('.perm-wr span, .perm-del span').forEach(s => s.classList.remove('text-gray-500'));
+            } else {
+                hide($('secretWarn'));
+                $('permWrite').disabled = true;
+                $('permWrite').checked = false;
+                $('permDelete').disabled = true;
+                $('permDelete').checked = false;
+                document.querySelectorAll('.perm-wr span, .perm-del span').forEach(s => s.classList.add('text-gray-500'));
+            }
+        }
+
+        async function createKey() {
+            const name = $('keyName').value.trim() || 'API Key ' + (keys.length + 1);
+            const id = genId();
+            const keyData = {
+                id,
+                userId: user.id,
+                key: genKey(keyType),
+                name,
+                type: keyType,
+                purpose: $('keyPurpose').value,
+                domain: $('keyDomain').value.trim() || null,
+                expiry: $('keyExpiry').value,
+                permissions: {
+                    read: true,
+                    write: keyType === 'secret' && $('permWrite').checked,
+                    delete: keyType === 'secret' && $('permDelete').checked,
+                    ai: $('permAI').checked
+                },
+                createdAt: Date.now()
+            };
+
+            await db.ref('okak_keys/' + id).set(keyData);
+            keys.push(keyData);
+            renderKeys();
+            $('statKeys').textContent = keys.length;
+            closeModal('keyModal');
+            toast('Ключ создан!');
+        }
+
+        function copyKey(key) {
+            navigator.clipboard.writeText(key);
+            toast('Ключ скопирован!');
+        }
+
+        async function deleteKey(id) {
+            if (!confirm('Удалить этот ключ?')) return;
+            await db.ref('okak_keys/' + id).remove();
+            keys = keys.filter(k => k.id !== id);
+            renderKeys();
+            $('statKeys').textContent = keys.length;
+            toast('Ключ удалён');
+        }
+
+        // Projects
+        async function loadProjects() {
+            const snap = await db.ref('okak_projects').orderByChild('userId').equalTo(user.id).once('value');
+            projects = [];
+            snap.forEach(child => projects.push(child.val()));
+            renderProjects();
+            $('statProjects').textContent = projects.length;
+        }
+
+        function renderProjects() {
+            const list = $('projList');
+            if (projects.length === 0) {
+                list.innerHTML = '';
+                show($('noProj'));
+                return;
+            }
+            hide($('noProj'));
+            list.innerHTML = projects.map(p => `
+                <div class="glass rounded-xl p-6 card-hover">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center text-xl">📁</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold truncate">${p.name}</div>
+                            <div class="text-xs text-gray-400 truncate">${p.domain || 'Без домена'}</div>
+                        </div>
+                    </div>
+                    ${p.description ? `<p class="text-sm text-gray-400 mb-3 line-clamp-2">${p.description}</p>` : ''}
+                    <div class="text-xs text-gray-500 mb-3">${p.apiKey ? 'API: ' + p.apiKey.substring(0, 15) + '...' : 'Ключ не привязан'}</div>
+                    <button onclick="deleteProj('${p.id}')" class="w-full py-2 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30 transition">Удалить</button>
+                </div>
+            `).join('');
+        }
+
+        function openProjModal() {
+            openModal('projModal');
+            $('projName').value = '';
+            $('projDomain').value = '';
+            $('projDesc').value = '';
+            $('projKey').innerHTML = '<option value="">Привязать API ключ (опционально)</option>' +
+                keys.map(k => `<option value="${k.key}">${k.name} (${k.type})</option>`).join('');
+        }
+
+        async function createProj() {
+            const name = $('projName').value.trim();
+            if (!name) return toast('Введите название', true);
+
+            const id = genId();
+            const projData = {
+                id,
+                userId: user.id,
+                name,
+                domain: $('projDomain').value.trim(),
+                description: $('projDesc').value.trim(),
+                apiKey: $('projKey').value,
+                createdAt: Date.now()
+            };
+
+            await db.ref('okak_projects/' + id).set(projData);
+            projects.push(projData);
+            renderProjects();
+            $('statProjects').textContent = projects.length;
+            closeModal('projModal');
+            toast('Проект создан!');
+        }
+
+        async function deleteProj(id) {
+            if (!confirm('Удалить проект?')) return;
+            await db.ref('okak_projects/' + id).remove();
+            projects = projects.filter(p => p.id !== id);
+            renderProjects();
+            $('statProjects').textContent = projects.length;
+            toast('Проект удалён');
+        }
+
+        // Database
+        async function loadDbTree() {
+            try {
+                const snap = await db.ref('okak_data/' + user.id).once('value');
+                const data = snap.val();
+                $('dbTree').innerHTML = data ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : '<span class="text-gray-500">Пусто</span>';
+            } catch (e) {
+                $('dbTree').innerHTML = '<span class="text-red-400">Ошибка загрузки</span>';
+            }
+        }
+
+        async function dbRead() {
+            const path = $('dbPath').value.trim();
+            if (!path) return toast('Введите путь', true);
+            try {
+                const snap = await db.ref(`okak_data/${user.id}/${path}`).once('value');
+                show($('dbResult'));
+                $('dbResultPre').textContent = JSON.stringify(snap.val(), null, 2) || 'null';
+                incReqs();
+            } catch (e) {
+                toast('Ошибка чтения', true);
+            }
+        }
+
+        async function dbWrite() {
+            const path = $('dbPath').value.trim();
+            const data = $('dbData').value.trim();
+            if (!path) return toast('Введите путь', true);
+
+            let parsed;
+            try { parsed = JSON.parse(data); } catch { parsed = data; }
+
+            try {
+                await db.ref(`okak_data/${user.id}/${path}`).set(parsed);
+                show($('dbResult'));
+                $('dbResultPre').textContent = '✅ Записано!';
+                incReqs();
+                loadDbTree();
+                toast('Сохранено!');
+            } catch (e) {
+                toast('Ошибка записи', true);
+            }
+        }
+
+        async function dbDelete() {
+            const path = $('dbPath').value.trim();
+            if (!path) return toast('Введите путь', true);
+            if (!confirm('Удалить данные?')) return;
+
+            try {
+                await db.ref(`okak_data/${user.id}/${path}`).remove();
+                show($('dbResult'));
+                $('dbResultPre').textContent = '🗑️ Удалено!';
+                incReqs();
+                loadDbTree();
+                toast('Удалено');
+            } catch (e) {
+                toast('Ошибка удаления', true);
+            }
+        }
+
+        // Settings
+        async function saveProfile() {
+            const name = $('setName').value.trim();
+            if (!name) return toast('Введите имя', true);
+            
+            user.name = name;
+            await db.ref('okak_users/' + user.id).update({ name });
+            $('userName').textContent = name;
+            toast('Сохранено!');
+        }
+
+        async function deleteAccount() {
+            if (!confirm('Вы уверены? Все данные будут удалены!')) return;
+            if (!confirm('Это действие нельзя отменить. Продолжить?')) return;
+            
+            await db.ref('okak_users/' + user.id).remove();
+            await db.ref('okak_keys').orderByChild('userId').equalTo(user.id).once('value', snap => {
+                snap.forEach(child => child.ref.remove());
+            });
+            await db.ref('okak_projects').orderByChild('userId').equalTo(user.id).once('value', snap => {
+                snap.forEach(child => child.ref.remove());
+            });
+            await db.ref('okak_data/' + user.id).remove();
+            
+            logout();
+            toast('Аккаунт удалён');
+        }
+
+        // Guest Playground
+        async function testAI() {
+            const prompt = $('aiPrompt').value.trim();
+            if (!prompt) return toast('Введите запрос', true);
+
+            $('aiBtn').disabled = true;
+            $('aiBtnText').textContent = 'Генерация...';
+            show($('aiLoader'));
+            show($('aiResult'));
+            $('aiResult').textContent = 'Думаю...';
+
+            try {
+                const model = $('aiModel').value;
+                const text = await OKAK.ai(prompt, model);
+                $('aiResult').textContent = text;
+            } catch (e) {
+                $('aiResult').textContent = 'Ошибка генерации';
+            }
+
+            $('aiBtn').disabled = false;
+            $('aiBtnText').textContent = 'Сгенерировать';
+            hide($('aiLoader'));
+        }
+
+        async function testImage() {
+            const prompt = $('imgPrompt').value.trim();
+            if (!prompt) return toast('Введите описание', true);
+
+            $('imgBtn').disabled = true;
+            $('imgBtnText').textContent = 'Создание...';
+            show($('imgLoader'));
+
+            const model = $('imgModel').value;
+            const url = OKAK.image(prompt, { model });
+            
+            const img = $('generatedImg');
+            img.onload = () => {
+                show($('imgResult'));
+                $('imgBtn').disabled = false;
+                $('imgBtnText').textContent = 'Создать';
+                hide($('imgLoader'));
+            };
+            img.onerror = () => {
+                toast('Ошибка генерации', true);
+                $('imgBtn').disabled = false;
+                $('imgBtnText').textContent = 'Создать';
+                hide($('imgLoader'));
+            };
+            img.src = url;
+        }
+
+        function testQR() {
+            const data = $('qrData').value.trim();
+            if (!data) return toast('Введите данные', true);
+            const color = $('qrColor').value || '667eea';
+            const size = $('qrSize').value || 200;
+            const url = OKAK.qr(data, { size, color });
+            $('generatedQR').src = url;
+            show($('qrResult'));
+        }
+
+        async function testHash(algo) {
+            const text = $('cryptoInput').value;
+            if (!text) return toast('Введите текст', true);
+            const hash = await OKAK.hash(text, algo);
+            $('cryptoResult').textContent = hash;
+            show($('cryptoResult'));
+        }
+
+        function testBase64(mode) {
+            const text = $('cryptoInput').value;
+            if (!text) return toast('Введите текст', true);
+            try {
+                $('cryptoResult').textContent = OKAK.base64(text, mode);
+                show($('cryptoResult'));
+            } catch (e) {
+                toast('Ошибка', true);
+            }
+        }
+
+        function testUUID() {
+            $('cryptoResult').textContent = OKAK.uuid();
+            show($('cryptoResult'));
+        }
+
+        // Dashboard Playground
+        async function dTestAI() {
+            const prompt = $('dAiPrompt').value.trim();
+            if (!prompt) return toast('Введите запрос', true);
+
+            $('dAiBtn').disabled = true;
+            $('dAiBtn').textContent = 'Генерация...';
+            show($('dAiResult'));
+            $('dAiResult').textContent = 'Думаю...';
+
+            try {
+                const model = $('dAiModel').value;
+                const text = await OKAK.ai(prompt, model);
+                $('dAiResult').textContent = text;
+                incReqs();
+            } catch (e) {
+                $('dAiResult').textContent = 'Ошибка';
+            }
+
+            $('dAiBtn').disabled = false;
+            $('dAiBtn').textContent = 'Генерировать';
+        }
+
+        async function dTestImg() {
+            const prompt = $('dImgPrompt').value.trim();
+            if (!prompt) return toast('Введите описание', true);
+
+            $('dImgBtn').disabled = true;
+            $('dImgBtn').textContent = 'Создание...';
+
+            const model = $('dImgModel').value;
+            const url = OKAK.image(prompt, { model });
+            
+            const img = $('dGenImg');
+            img.onload = () => {
+                show($('dImgResult'));
+                $('dImgBtn').disabled = false;
+                $('dImgBtn').textContent = 'Создать';
+                incReqs();
+            };
+            img.onerror = () => {
+                toast('Ошибка', true);
+                $('dImgBtn').disabled = false;
+                $('dImgBtn').textContent = 'Создать';
+            };
+            img.src = url;
+        }
+
+        function dTestQR() {
+            const data = $('dQrData').value.trim();
+            if (!data) return toast('Введите данные', true);
+            $('dGenQR').src = OKAK.qr(data, { size: 200, color: '667eea' });
+            show($('dQrResult'));
+            incReqs();
+        }
+
+        async function dHash(algo) {
+            const text = $('dCryptoIn').value;
+            if (!text) return toast('Введите текст', true);
+            $('dCryptoRes').textContent = await OKAK.hash(text, algo);
+            show($('dCryptoRes'));
+        }
+
+        function dB64(mode) {
+            const text = $('dCryptoIn').value;
+            if (!text) return toast('Введите текст', true);
+            try {
+                $('dCryptoRes').textContent = OKAK.base64(text, mode);
+                show($('dCryptoRes'));
+            } catch (e) {
+                toast('Ошибка', true);
+            }
+        }
+
+        function dUUID() {
+            $('dCryptoRes').textContent = OKAK.uuid();
+            show($('dCryptoRes'));
+        }
+
+        // Doc tabs
+        function showDocTab(tab) {
+            document.querySelectorAll('.doc-section').forEach(s => hide(s));
+            document.querySelectorAll('.doc-tab').forEach(t => {
+                t.classList.remove('tab-active');
+                t.classList.add('text-gray-400');
+            });
+            show($('doc-' + tab));
+            document.querySelector(`.doc-tab[data-tab="${tab}"]`)?.classList.add('tab-active');
+            document.querySelector(`.doc-tab[data-tab="${tab}"]`)?.classList.remove('text-gray-400');
+        }
+
+        function showDocsTab(tab) {
+            document.querySelectorAll('.docs-sec').forEach(s => hide(s));
+            document.querySelectorAll('.docs-tab').forEach(t => {
+                t.classList.remove('tab-active');
+                t.classList.add('text-gray-400');
+            });
+            show($('docs-' + tab));
+            document.querySelector(`.docs-tab[data-tab="${tab}"]`)?.classList.add('tab-active');
+            document.querySelector(`.docs-tab[data-tab="${tab}"]`)?.classList.remove('text-gray-400');
+        }
+
+        // Init
+        async function init() {
+            updateNav();
+            showDocTab('quick');
+
+            const uid = localStorage.getItem('okak_uid');
+            if (uid) {
+                const snap = await db.ref('okak_users/' + uid).once('value');
+                if (snap.exists()) {
+                    user = snap.val();
+                    showDashboard();
+                }
+            }
+        }
+
+        init();
+
+        // Keyboard
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                closeModal('authModal');
+                closeModal('keyModal');
+                closeModal('projModal');
+            }
+        });
+    </script>
+</body>
+</html>
