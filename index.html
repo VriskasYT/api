@@ -478,7 +478,7 @@ GET /api/crypto/uuid?key=YOUR_KEY</pre>
                     <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center font-bold">O</div>
                     <span class="font-bold">OKAK API</span>
                 </div>
-                <p class="text-gray-500 text-sm">© 2024 OKAK API. Бесплатно навсегда.</p>
+                <p class="text-gray-500 text-sm">© 2026 OKAK API. Бесплатно навсегда.</p>
             </div>
         </footer>
     </div>
@@ -1201,7 +1201,7 @@ img.src = url;</pre>
         }
 
         async function hashPwd(pwd) {
-            const data = new TextEncoder().encode(pwd + 'okak_2024');
+            const data = new TextEncoder().encode(pwd + 'okak_2026');
             const hash = await crypto.subtle.digest('SHA-256', data);
             return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
