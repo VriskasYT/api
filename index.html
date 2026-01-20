@@ -232,7 +232,7 @@
                             </div>
                             <div class="mt-6 code-block rounded-xl p-4 overflow-x-auto">
                                 <pre class="mono text-sm"><span class="text-gray-500">// Пример запроса к AI API</span>
-<span class="text-purple-400">const</span> response = <span class="text-purple-400">await</span> <span class="text-yellow-300">fetch</span>(<span class="text-green-400">'https://YOUR_SITE/api/ai?prompt=Привет&key=YOUR_KEY'</span>);
+<span class="text-purple-400">const</span> response = <span class="text-purple-400">await</span> <span class="text-yellow-300">fetch</span>(<span class="text-green-400">'https://vriskasyt.github.io/api/ai?prompt=Привет&key=YOUR_KEY'</span>);
 <span class="text-purple-400">const</span> data = <span class="text-purple-400">await</span> response.<span class="text-yellow-300">json</span>();
 console.<span class="text-yellow-300">log</span>(data.text);</pre>
                             </div>
@@ -252,7 +252,7 @@ console.<span class="text-yellow-300">log</span>(data.text);</pre>
                                     <div class="code-block rounded-xl p-4 overflow-x-auto">
                                         <pre class="mono text-sm"><span class="text-gray-500">// JavaScript</span>
 <span class="text-purple-400">const</span> res = <span class="text-purple-400">await</span> <span class="text-yellow-300">fetch</span>(
-  <span class="text-green-400">`https://yoursite.github.io/api/ai?prompt=</span><span class="text-yellow-300">${</span>prompt<span class="text-yellow-300">}</span><span class="text-green-400">&key=</span><span class="text-yellow-300">${</span>apiKey<span class="text-yellow-300">}</span><span class="text-green-400">`</span>
+  <span class="text-green-400">`https://vriskasyt.github.io/api/ai?prompt=</span><span class="text-yellow-300">${</span>prompt<span class="text-yellow-300">}</span><span class="text-green-400">&key=</span><span class="text-yellow-300">${</span>apiKey<span class="text-yellow-300">}</span><span class="text-green-400">`</span>
 );
 <span class="text-purple-400">const</span> data = <span class="text-purple-400">await</span> res.<span class="text-yellow-300">json</span>();</pre>
                                     </div>
@@ -278,10 +278,10 @@ console.<span class="text-yellow-300">log</span>(data.text);</pre>
                             
                             <div class="code-block rounded-xl p-4 overflow-x-auto mb-4">
                                 <pre class="mono text-sm"><span class="text-gray-500">// Генерация изображения</span>
-<span class="text-purple-400">const</span> imageUrl = <span class="text-green-400">`https://yoursite.github.io/api/image?prompt=</span><span class="text-yellow-300">${</span>prompt<span class="text-yellow-300">}</span><span class="text-green-400">&key=</span><span class="text-yellow-300">${</span>key<span class="text-yellow-300">}</span><span class="text-green-400">`</span>;
+<span class="text-purple-400">const</span> imageUrl = <span class="text-green-400">`https://vriskasyt.github.io/api/image?prompt=</span><span class="text-yellow-300">${</span>prompt<span class="text-yellow-300">}</span><span class="text-green-400">&key=</span><span class="text-yellow-300">${</span>key<span class="text-yellow-300">}</span><span class="text-green-400">`</span>;
 
 <span class="text-gray-500">// С параметрами</span>
-<span class="text-purple-400">const</span> url = <span class="text-green-400">'...?prompt=cat&width=512&height=512&model=flux'</span>;</pre>
+<span class="text-purple-400">const</span> url = <span class="text-green-400">'https://vriskasyt.github.io/api/image?prompt=cat&width=512&height=512&model=flux'</span>;</pre>
                             </div>
                             
                             <div class="grid sm:grid-cols-2 gap-4">
@@ -727,7 +727,7 @@ GET /api/crypto/uuid?key=YOUR_KEY</pre>
 
                                     <h4 class="font-bold mt-6 mb-3">Базовый URL:</h4>
                                     <div class="code-block rounded-xl p-4 mono text-sm">
-https://YOUR_USERNAME.github.io/api/
+https://vriskasyt.github.io/api/
                                     </div>
                                 </div>
 
@@ -866,20 +866,19 @@ DELETE ?path=users/123&key=YOUR_SK_KEY
                                         <div>
                                             <h4 class="font-bold mb-2">JavaScript (fetch)</h4>
                                             <div class="code-block rounded-xl p-4 mono text-sm overflow-x-auto">
-<pre>// AI генерация
-const res = await fetch('/api/ai?prompt=Hello&key=YOUR_KEY');
-const data = await res.json();
-console.log(data.text);
+<pre>// AI генерация (используя OKAK SDK)
+const text = await OKAK.ai('Hello', 'openai');
+console.log(text);
 
 // Изображение
 const img = document.createElement('img');
-img.src = '/api/image?prompt=cat&key=YOUR_KEY';
+img.src = OKAK.image('cute cat', { model: 'flux' });
 
-// База данных
-await fetch('/api/db?path=users/1&key=YOUR_SK_KEY', {
-  method: 'POST',
-  body: JSON.stringify({ name: 'John' })
-});</pre>
+// QR-код
+const qrUrl = OKAK.qr('https://example.com', { size: 200 });
+
+// Хеширование
+const hash = await OKAK.hash('password', 'SHA-256');</pre>
                                             </div>
                                         </div>
 
@@ -888,12 +887,15 @@ await fetch('/api/db?path=users/1&key=YOUR_SK_KEY', {
                                             <div class="code-block rounded-xl p-4 mono text-sm overflow-x-auto">
 <pre>import requests
 
-# AI
-res = requests.get('/api/ai', params={
+# AI генерация (через прямой API)
+res = requests.get('https://vriskasyt.github.io/api/', params={
+    'action': 'ai',
     'prompt': 'Hello',
-    'key': 'YOUR_KEY'
+    'model': 'openai'
 })
-print(res.json()['text'])</pre>
+print(res.text)
+
+# Или используйте OKAK SDK в JavaScript на клиенте</pre>
                                             </div>
                                         </div>
                                     </div>
