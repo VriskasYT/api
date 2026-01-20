@@ -211,30 +211,37 @@
                                 <div class="flex gap-4 items-start">
                                     <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center font-bold flex-shrink-0">1</div>
                                     <div>
-                                        <div class="font-semibold">Зарегистрируйтесь</div>
-                                        <div class="text-gray-400 text-sm">Создайте бесплатный аккаунт на OKAK API</div>
+                                        <div class="font-semibold">Подключите SDK</div>
+                                        <div class="text-gray-400 text-sm">Добавьте скрипт на вашу страницу</div>
                                     </div>
                                 </div>
                                 <div class="flex gap-4 items-start">
                                     <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center font-bold flex-shrink-0">2</div>
                                     <div>
-                                        <div class="font-semibold">Создайте API ключ</div>
-                                        <div class="text-gray-400 text-sm">Выберите тип: публичный (pk_) или секретный (sk_)</div>
+                                        <div class="font-semibold">Вызывайте методы</div>
+                                        <div class="text-gray-400 text-sm">OKAK.ai(), OKAK.image(), OKAK.qr() и другие</div>
                                     </div>
                                 </div>
                                 <div class="flex gap-4 items-start">
                                     <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center font-bold flex-shrink-0">3</div>
                                     <div>
-                                        <div class="font-semibold">Используйте API</div>
-                                        <div class="text-gray-400 text-sm">Интегрируйте в свой проект</div>
+                                        <div class="font-semibold">Готово!</div>
+                                        <div class="text-gray-400 text-sm">Никаких ключей не нужно для базового использования</div>
                                     </div>
                                 </div>
                             </div>
                             <div class="mt-6 code-block rounded-xl p-4 overflow-x-auto">
-                                <pre class="mono text-sm"><span class="text-gray-500">// Пример запроса к AI API</span>
-<span class="text-purple-400">const</span> response = <span class="text-purple-400">await</span> <span class="text-yellow-300">fetch</span>(<span class="text-green-400">'https://vriskasyt.github.io/api/ai?prompt=Привет&key=YOUR_KEY'</span>);
-<span class="text-purple-400">const</span> data = <span class="text-purple-400">await</span> response.<span class="text-yellow-300">json</span>();
-console.<span class="text-yellow-300">log</span>(data.text);</pre>
+                                <pre class="mono text-sm"><span class="text-gray-500">&lt;!-- 1. Подключите SDK --&gt;</span>
+<span class="text-pink-400">&lt;script src="https://vriskasyt.github.io/api/api.js"&gt;&lt;/script&gt;</span>
+
+<span class="text-gray-500">&lt;!-- 2. Используйте --&gt;</span>
+<span class="text-pink-400">&lt;script&gt;</span>
+  <span class="text-gray-500">// AI генерация текста</span>
+  <span class="text-purple-400">const</span> text = <span class="text-purple-400">await</span> OKAK.<span class="text-yellow-300">ai</span>(<span class="text-green-400">'Привет! Как дела?'</span>);
+  
+  <span class="text-gray-500">// Генерация изображения</span>
+  <span class="text-purple-400">const</span> imgUrl = OKAK.<span class="text-yellow-300">image</span>(<span class="text-green-400">'cute cat'</span>);
+<span class="text-pink-400">&lt;/script&gt;</span></pre>
                             </div>
                         </div>
 
@@ -246,15 +253,16 @@ console.<span class="text-yellow-300">log</span>(data.text);</pre>
                             <div class="space-y-4">
                                 <div>
                                     <div class="flex items-center gap-2 mb-2">
-                                        <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-mono">GET</span>
-                                        <span class="mono text-sm">/api/ai?prompt={text}&model={model}&key={key}</span>
+                                        <span class="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs font-mono">ASYNC</span>
+                                        <span class="mono text-sm">OKAK.ai(prompt, model)</span>
                                     </div>
                                     <div class="code-block rounded-xl p-4 overflow-x-auto">
-                                        <pre class="mono text-sm"><span class="text-gray-500">// JavaScript</span>
-<span class="text-purple-400">const</span> res = <span class="text-purple-400">await</span> <span class="text-yellow-300">fetch</span>(
-  <span class="text-green-400">`https://vriskasyt.github.io/api/ai?prompt=</span><span class="text-yellow-300">${</span>prompt<span class="text-yellow-300">}</span><span class="text-green-400">&key=</span><span class="text-yellow-300">${</span>apiKey<span class="text-yellow-300">}</span><span class="text-green-400">`</span>
-);
-<span class="text-purple-400">const</span> data = <span class="text-purple-400">await</span> res.<span class="text-yellow-300">json</span>();</pre>
+                                        <pre class="mono text-sm"><span class="text-gray-500">// Подключите SDK</span>
+<span class="text-pink-400">&lt;script src="https://vriskasyt.github.io/api/api.js"&gt;&lt;/script&gt;</span>
+
+<span class="text-gray-500">// Используйте</span>
+<span class="text-purple-400">const</span> response = <span class="text-purple-400">await</span> OKAK.<span class="text-yellow-300">ai</span>(<span class="text-green-400">'Расскажи шутку'</span>, <span class="text-green-400">'openai'</span>);
+console.<span class="text-yellow-300">log</span>(response); <span class="text-gray-500">// "Почему программисты..."</span></pre>
                                     </div>
                                 </div>
                                 
@@ -277,21 +285,26 @@ console.<span class="text-yellow-300">log</span>(data.text);</pre>
                             <p class="text-gray-400 mb-4">Создание изображений по текстовому описанию</p>
                             
                             <div class="code-block rounded-xl p-4 overflow-x-auto mb-4">
-                                <pre class="mono text-sm"><span class="text-gray-500">// Генерация изображения</span>
-<span class="text-purple-400">const</span> imageUrl = <span class="text-green-400">`https://vriskasyt.github.io/api/image?prompt=</span><span class="text-yellow-300">${</span>prompt<span class="text-yellow-300">}</span><span class="text-green-400">&key=</span><span class="text-yellow-300">${</span>key<span class="text-yellow-300">}</span><span class="text-green-400">`</span>;
+                                <pre class="mono text-sm"><span class="text-gray-500">// Простая генерация</span>
+<span class="text-purple-400">const</span> url = OKAK.<span class="text-yellow-300">image</span>(<span class="text-green-400">'cute cat playing'</span>);
+document.<span class="text-yellow-300">getElementById</span>(<span class="text-green-400">'img'</span>).src = url;
 
 <span class="text-gray-500">// С параметрами</span>
-<span class="text-purple-400">const</span> url = <span class="text-green-400">'https://vriskasyt.github.io/api/image?prompt=cat&width=512&height=512&model=flux'</span>;</pre>
+<span class="text-purple-400">const</span> url2 = OKAK.<span class="text-yellow-300">image</span>(<span class="text-green-400">'space landscape'</span>, {
+  width: <span class="text-orange-400">1024</span>,
+  height: <span class="text-orange-400">768</span>,
+  model: <span class="text-green-400">'flux'</span>
+});</pre>
                             </div>
                             
                             <div class="grid sm:grid-cols-2 gap-4">
                                 <div class="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-                                    <div class="font-semibold text-blue-400 mb-2">Параметры:</div>
+                                    <div class="font-semibold text-blue-400 mb-2">Параметры options:</div>
                                     <ul class="text-sm text-gray-300 space-y-1">
-                                        <li><code>prompt</code> - описание</li>
                                         <li><code>width</code> - ширина (до 1024)</li>
                                         <li><code>height</code> - высота (до 1024)</li>
                                         <li><code>model</code> - flux, turbo</li>
+                                        <li><code>nologo</code> - без водяного знака</li>
                                     </ul>
                                 </div>
                                 <div class="p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
@@ -714,7 +727,7 @@ GET /api/crypto/uuid?key=YOUR_KEY</pre>
                             <div id="docsContent">
                                 <div id="docs-intro" class="docs-sec">
                                     <h3 class="text-xl font-bold mb-4">🚀 Введение</h3>
-                                    <p class="text-gray-300 mb-4">OKAK API — бесплатная платформа с набором мощных API для разработчиков.</p>
+                                    <p class="text-gray-300 mb-4">OKAK API — бесплатная платформа с набором мощных API для разработчиков. Работает через JavaScript SDK.</p>
                                     
                                     <h4 class="font-bold mt-6 mb-3">Доступные сервисы:</h4>
                                     <ul class="space-y-2 text-gray-300">
@@ -725,9 +738,15 @@ GET /api/crypto/uuid?key=YOUR_KEY</pre>
                                         <li>🔐 <strong>Crypto</strong> — хеширование</li>
                                     </ul>
 
-                                    <h4 class="font-bold mt-6 mb-3">Базовый URL:</h4>
-                                    <div class="code-block rounded-xl p-4 mono text-sm">
-https://vriskasyt.github.io/api/
+                                    <h4 class="font-bold mt-6 mb-3">Подключение SDK:</h4>
+                                    <div class="code-block rounded-xl p-4 mono text-sm overflow-x-auto">
+<pre><span class="text-gray-500">&lt;!-- Подключите в HTML --&gt;</span>
+<span class="text-pink-400">&lt;script</span> <span class="text-yellow-300">src</span>=<span class="text-green-400">"https://vriskasyt.github.io/api/api.js"</span><span class="text-pink-400">&gt;&lt;/script&gt;</span>
+
+<span class="text-gray-500">&lt;!-- Теперь доступен объект OKAK --&gt;</span>
+<span class="text-pink-400">&lt;script&gt;</span>
+  <span class="text-purple-400">const</span> text = <span class="text-purple-400">await</span> OKAK.<span class="text-yellow-300">ai</span>(<span class="text-green-400">'Привет!'</span>);
+<span class="text-pink-400">&lt;/script&gt;</span></pre>
                                     </div>
                                 </div>
 
@@ -739,78 +758,103 @@ https://vriskasyt.github.io/api/
                                             <div class="font-bold text-green-400 mb-2">🌐 Публичный ключ (pk_)</div>
                                             <ul class="text-sm text-gray-300 space-y-1">
                                                 <li>• Безопасен для клиентского кода</li>
-                                                <li>• Только чтение данных</li>
-                                                <li>• Можно публиковать</li>
+                                                <li>• Только чтение данных из БД</li>
+                                                <li>• Можно публиковать в коде сайта</li>
                                             </ul>
                                         </div>
                                         
                                         <div class="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
                                             <div class="font-bold text-orange-400 mb-2">🔒 Секретный ключ (sk_)</div>
                                             <ul class="text-sm text-gray-300 space-y-1">
-                                                <li>• ТОЛЬКО для сервера</li>
+                                                <li>• ТОЛЬКО для серверного кода</li>
                                                 <li>• Полный доступ (read/write/delete)</li>
                                                 <li>• НИКОГДА не публикуйте!</li>
                                             </ul>
                                         </div>
                                     </div>
 
-                                    <h4 class="font-bold mt-6 mb-3">Использование:</h4>
-                                    <div class="code-block rounded-xl p-4 mono text-sm">
-// В параметре запроса
-?key=YOUR_API_KEY
+                                    <h4 class="font-bold mt-6 mb-3">Инициализация SDK:</h4>
+                                    <div class="code-block rounded-xl p-4 mono text-sm overflow-x-auto">
+<pre><span class="text-gray-500">// 1. Подключите SDK</span>
+<span class="text-pink-400">&lt;script</span> <span class="text-yellow-300">src</span>=<span class="text-green-400">"https://vriskasyt.github.io/api/api.js"</span><span class="text-pink-400">&gt;&lt;/script&gt;</span>
 
-// Или в заголовке
-Authorization: Bearer YOUR_API_KEY
+<span class="text-gray-500">// 2. Инициализируйте с вашим ключом (опционально)</span>
+OKAK.<span class="text-yellow-300">init</span>(<span class="text-green-400">'pk_ваш_ключ'</span>);
+
+<span class="text-gray-500">// 3. Используйте API</span>
+<span class="text-purple-400">const</span> response = <span class="text-purple-400">await</span> OKAK.<span class="text-yellow-300">ai</span>(<span class="text-green-400">'Привет!'</span>);</pre>
                                     </div>
                                 </div>
 
                                 <div id="docs-endpoints" class="docs-sec hidden">
-                                    <h3 class="text-xl font-bold mb-4">📡 API Endpoints</h3>
+                                    <h3 class="text-xl font-bold mb-4">📡 SDK Методы</h3>
                                     
                                     <div class="space-y-6">
                                         <div>
                                             <h4 class="font-bold mb-2 flex items-center gap-2">
-                                                <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">GET</span>
-                                                /api/ai
+                                                <span class="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs">ASYNC</span>
+                                                OKAK.ai(prompt, model)
                                             </h4>
-                                            <p class="text-gray-400 text-sm mb-2">Генерация текста</p>
-                                            <div class="code-block rounded-xl p-3 mono text-xs">
-?prompt=Hello&model=openai&key=YOUR_KEY
+                                            <p class="text-gray-400 text-sm mb-2">Генерация текста с помощью AI</p>
+                                            <div class="code-block rounded-xl p-3 mono text-xs overflow-x-auto">
+<pre><span class="text-purple-400">const</span> text = <span class="text-purple-400">await</span> OKAK.<span class="text-yellow-300">ai</span>(<span class="text-green-400">'Расскажи анекдот'</span>, <span class="text-green-400">'openai'</span>);
+<span class="text-gray-500">// Модели: openai, gemini, mistral, llama, deepseek</span></pre>
                                             </div>
                                         </div>
 
                                         <div>
                                             <h4 class="font-bold mb-2 flex items-center gap-2">
-                                                <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">GET</span>
-                                                /api/image
+                                                <span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">SYNC</span>
+                                                OKAK.image(prompt, options)
                                             </h4>
-                                            <p class="text-gray-400 text-sm mb-2">Генерация изображений</p>
-                                            <div class="code-block rounded-xl p-3 mono text-xs">
-?prompt=cat&model=flux&width=512&height=512&key=YOUR_KEY
+                                            <p class="text-gray-400 text-sm mb-2">Генерация изображений (возвращает URL)</p>
+                                            <div class="code-block rounded-xl p-3 mono text-xs overflow-x-auto">
+<pre><span class="text-purple-400">const</span> url = OKAK.<span class="text-yellow-300">image</span>(<span class="text-green-400">'cute cat'</span>, {
+  width: <span class="text-orange-400">512</span>,
+  height: <span class="text-orange-400">512</span>,
+  model: <span class="text-green-400">'flux'</span> <span class="text-gray-500">// или 'turbo'</span>
+});
+img.src = url;</pre>
                                             </div>
                                         </div>
 
                                         <div>
                                             <h4 class="font-bold mb-2 flex items-center gap-2">
-                                                <span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">GET/POST/DELETE</span>
-                                                /api/db
+                                                <span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">SYNC</span>
+                                                OKAK.qr(data, options)
                                             </h4>
-                                            <p class="text-gray-400 text-sm mb-2">База данных</p>
-                                            <div class="code-block rounded-xl p-3 mono text-xs">
-GET ?path=users/123&key=YOUR_KEY
-POST ?path=users/123&key=YOUR_SK_KEY (body: JSON)
-DELETE ?path=users/123&key=YOUR_SK_KEY
+                                            <p class="text-gray-400 text-sm mb-2">Генерация QR-кода (возвращает URL)</p>
+                                            <div class="code-block rounded-xl p-3 mono text-xs overflow-x-auto">
+<pre><span class="text-purple-400">const</span> qrUrl = OKAK.<span class="text-yellow-300">qr</span>(<span class="text-green-400">'https://example.com'</span>, {
+  size: <span class="text-orange-400">200</span>,
+  color: <span class="text-green-400">'667eea'</span>,
+  bg: <span class="text-green-400">'ffffff'</span>
+});</pre>
                                             </div>
                                         </div>
 
                                         <div>
                                             <h4 class="font-bold mb-2 flex items-center gap-2">
-                                                <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">GET</span>
-                                                /api/qr
+                                                <span class="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs">ASYNC</span>
+                                                OKAK.hash(text, algo)
                                             </h4>
-                                            <p class="text-gray-400 text-sm mb-2">QR-коды</p>
-                                            <div class="code-block rounded-xl p-3 mono text-xs">
-?data=https://example.com&size=200&color=667eea&key=YOUR_KEY
+                                            <p class="text-gray-400 text-sm mb-2">Хеширование текста</p>
+                                            <div class="code-block rounded-xl p-3 mono text-xs overflow-x-auto">
+<pre><span class="text-purple-400">const</span> hash = <span class="text-purple-400">await</span> OKAK.<span class="text-yellow-300">hash</span>(<span class="text-green-400">'password'</span>, <span class="text-green-400">'SHA-256'</span>);
+<span class="text-gray-500">// Алгоритмы: SHA-256, SHA-1, SHA-384, SHA-512</span></pre>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-bold mb-2 flex items-center gap-2">
+                                                <span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">SYNC</span>
+                                                OKAK.base64(text, mode) / OKAK.uuid()
+                                            </h4>
+                                            <p class="text-gray-400 text-sm mb-2">Утилиты</p>
+                                            <div class="code-block rounded-xl p-3 mono text-xs overflow-x-auto">
+<pre><span class="text-purple-400">const</span> encoded = OKAK.<span class="text-yellow-300">base64</span>(<span class="text-green-400">'Hello'</span>, <span class="text-green-400">'encode'</span>);
+<span class="text-purple-400">const</span> decoded = OKAK.<span class="text-yellow-300">base64</span>(encoded, <span class="text-green-400">'decode'</span>);
+<span class="text-purple-400">const</span> id = OKAK.<span class="text-yellow-300">uuid</span>();</pre>
                                             </div>
                                         </div>
                                     </div>
@@ -864,38 +908,58 @@ DELETE ?path=users/123&key=YOUR_SK_KEY
                                     
                                     <div class="space-y-6">
                                         <div>
-                                            <h4 class="font-bold mb-2">JavaScript (fetch)</h4>
+                                            <h4 class="font-bold mb-2">🌐 Полный пример HTML страницы</h4>
                                             <div class="code-block rounded-xl p-4 mono text-sm overflow-x-auto">
-<pre>// AI генерация (используя OKAK SDK)
-const text = await OKAK.ai('Hello', 'openai');
-console.log(text);
+<pre><span class="text-pink-400">&lt;!DOCTYPE html&gt;</span>
+<span class="text-pink-400">&lt;html&gt;</span>
+<span class="text-pink-400">&lt;head&gt;</span>
+  <span class="text-pink-400">&lt;title&gt;</span>Мой сайт с OKAK API<span class="text-pink-400">&lt;/title&gt;</span>
+<span class="text-pink-400">&lt;/head&gt;</span>
+<span class="text-pink-400">&lt;body&gt;</span>
+  <span class="text-pink-400">&lt;button</span> <span class="text-yellow-300">id</span>=<span class="text-green-400">"btn"</span><span class="text-pink-400">&gt;</span>Спросить AI<span class="text-pink-400">&lt;/button&gt;</span>
+  <span class="text-pink-400">&lt;div</span> <span class="text-yellow-300">id</span>=<span class="text-green-400">"result"</span><span class="text-pink-400">&gt;&lt;/div&gt;</span>
+  <span class="text-pink-400">&lt;img</span> <span class="text-yellow-300">id</span>=<span class="text-green-400">"img"</span><span class="text-pink-400">/&gt;</span>
 
-// Изображение
-const img = document.createElement('img');
-img.src = OKAK.image('cute cat', { model: 'flux' });
-
-// QR-код
-const qrUrl = OKAK.qr('https://example.com', { size: 200 });
-
-// Хеширование
-const hash = await OKAK.hash('password', 'SHA-256');</pre>
+  <span class="text-gray-500">&lt;!-- Подключаем OKAK SDK --&gt;</span>
+  <span class="text-pink-400">&lt;script</span> <span class="text-yellow-300">src</span>=<span class="text-green-400">"https://vriskasyt.github.io/api/api.js"</span><span class="text-pink-400">&gt;&lt;/script&gt;</span>
+  <span class="text-pink-400">&lt;script&gt;</span>
+    document.<span class="text-yellow-300">getElementById</span>(<span class="text-green-400">'btn'</span>).<span class="text-yellow-300">onclick</span> = <span class="text-purple-400">async</span> () => {
+      <span class="text-gray-500">// AI генерация текста</span>
+      <span class="text-purple-400">const</span> text = <span class="text-purple-400">await</span> OKAK.<span class="text-yellow-300">ai</span>(<span class="text-green-400">'Расскажи шутку'</span>);
+      document.<span class="text-yellow-300">getElementById</span>(<span class="text-green-400">'result'</span>).textContent = text;
+      
+      <span class="text-gray-500">// Генерация картинки</span>
+      document.<span class="text-yellow-300">getElementById</span>(<span class="text-green-400">'img'</span>).src = 
+        OKAK.<span class="text-yellow-300">image</span>(<span class="text-green-400">'funny cat'</span>, { model: <span class="text-green-400">'flux'</span> });
+    };
+  <span class="text-pink-400">&lt;/script&gt;</span>
+<span class="text-pink-400">&lt;/body&gt;</span>
+<span class="text-pink-400">&lt;/html&gt;</span></pre>
                                             </div>
                                         </div>
 
                                         <div>
-                                            <h4 class="font-bold mb-2">Python (requests)</h4>
+                                            <h4 class="font-bold mb-2">⚡ Быстрые примеры</h4>
                                             <div class="code-block rounded-xl p-4 mono text-sm overflow-x-auto">
-<pre>import requests
+<pre><span class="text-gray-500">// Чат-бот</span>
+<span class="text-purple-400">async function</span> <span class="text-yellow-300">chat</span>(message) {
+  <span class="text-purple-400">return await</span> OKAK.<span class="text-yellow-300">ai</span>(message, <span class="text-green-400">'gemini'</span>);
+}
 
-# AI генерация (через прямой API)
-res = requests.get('https://vriskasyt.github.io/api/', params={
-    'action': 'ai',
-    'prompt': 'Hello',
-    'model': 'openai'
-})
-print(res.text)
+<span class="text-gray-500">// Генератор аватаров</span>
+<span class="text-purple-400">function</span> <span class="text-yellow-300">avatar</span>(description) {
+  <span class="text-purple-400">return</span> OKAK.<span class="text-yellow-300">image</span>(description, { width: <span class="text-orange-400">256</span>, height: <span class="text-orange-400">256</span> });
+}
 
-# Или используйте OKAK SDK в JavaScript на клиенте</pre>
+<span class="text-gray-500">// QR для ссылки</span>
+<span class="text-purple-400">function</span> <span class="text-yellow-300">shareLink</span>(url) {
+  <span class="text-purple-400">return</span> OKAK.<span class="text-yellow-300">qr</span>(url, { size: <span class="text-orange-400">300</span>, color: <span class="text-green-400">'000'</span> });
+}
+
+<span class="text-gray-500">// Хеширование пароля</span>
+<span class="text-purple-400">async function</span> <span class="text-yellow-300">hashPassword</span>(pwd) {
+  <span class="text-purple-400">return await</span> OKAK.<span class="text-yellow-300">hash</span>(pwd, <span class="text-green-400">'SHA-256'</span>);
+}</pre>
                                             </div>
                                         </div>
                                     </div>
