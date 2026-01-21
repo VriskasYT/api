@@ -1713,14 +1713,16 @@ img.src = url;</pre>
             $('aiBtnText').textContent = 'Генерация...';
             show($('aiLoader'));
             show($('aiResult'));
-            $('aiResult').textContent = 'Думаю...';
+            $('aiResult').textContent = '🤔 Думаю... (это может занять до 30 сек)';
 
             try {
                 const model = $('aiModel').value;
+                // Используем OKAK.ai с автоматическими повторами и fallback
                 const text = await OKAK.ai(prompt, model);
-                $('aiResult').textContent = text;
+                $('aiResult').textContent = text || 'Пустой ответ. Попробуйте другой запрос.';
             } catch (e) {
-                $('aiResult').textContent = 'Ошибка генерации';
+                console.error('AI Error:', e);
+                $('aiResult').textContent = '❌ Ошибка генерации. Попробуйте:\n• Другую модель (Mistral обычно быстрее)\n• Упростить запрос\n• Повторить через минуту';
             }
 
             $('aiBtn').disabled = false;
@@ -1735,22 +1737,45 @@ img.src = url;</pre>
             $('imgBtn').disabled = true;
             $('imgBtnText').textContent = 'Создание...';
             show($('imgLoader'));
+            
+            // Показываем placeholder во время загрузки
+            show($('imgResult'));
+            $('generatedImg').style.opacity = '0.3';
+            $('generatedImg').src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect fill="%231a1b26" width="512" height="512"/><text x="50%" y="50%" fill="%23667eea" font-size="24" text-anchor="middle" dy=".3em">⏳ Генерация...</text></svg>';
 
             const model = $('imgModel').value;
             const url = OKAK.image(prompt, { model });
             
             const img = $('generatedImg');
+            
+            // Таймаут для изображения
+            const timeout = setTimeout(() => {
+                // Пробуем turbo модель как fallback
+                if (model !== 'turbo') {
+                    toast('Пробуем быструю модель...', false);
+                    img.src = OKAK.image(prompt, { model: 'turbo' });
+                }
+            }, 20000);
+            
             img.onload = () => {
-                show($('imgResult'));
+                clearTimeout(timeout);
+                img.style.opacity = '1';
                 $('imgBtn').disabled = false;
                 $('imgBtnText').textContent = 'Создать';
                 hide($('imgLoader'));
             };
             img.onerror = () => {
-                toast('Ошибка генерации', true);
-                $('imgBtn').disabled = false;
-                $('imgBtnText').textContent = 'Создать';
-                hide($('imgLoader'));
+                clearTimeout(timeout);
+                // Пробуем ещё раз с turbo
+                if (model !== 'turbo') {
+                    img.src = OKAK.image(prompt, { model: 'turbo' });
+                } else {
+                    toast('Ошибка генерации. Попробуйте другой запрос.', true);
+                    hide($('imgResult'));
+                    $('imgBtn').disabled = false;
+                    $('imgBtnText').textContent = 'Создать';
+                    hide($('imgLoader'));
+                }
             };
             img.src = url;
         }
@@ -1795,17 +1820,18 @@ img.src = url;</pre>
             if (!prompt) return toast('Введите запрос', true);
 
             $('dAiBtn').disabled = true;
-            $('dAiBtn').textContent = 'Генерация...';
+            $('dAiBtn').textContent = '⏳ Генерация...';
             show($('dAiResult'));
-            $('dAiResult').textContent = 'Думаю...';
+            $('dAiResult').textContent = '🤔 Обрабатываю запрос... (до 30 сек)';
 
             try {
                 const model = $('dAiModel').value;
                 const text = await OKAK.ai(prompt, model);
-                $('dAiResult').textContent = text;
+                $('dAiResult').textContent = text || 'Пустой ответ';
                 incReqs();
             } catch (e) {
-                $('dAiResult').textContent = 'Ошибка';
+                console.error('AI Error:', e);
+                $('dAiResult').textContent = '❌ Ошибка. Попробуйте другую модель или упростите запрос.';
             }
 
             $('dAiBtn').disabled = false;
@@ -1817,22 +1843,42 @@ img.src = url;</pre>
             if (!prompt) return toast('Введите описание', true);
 
             $('dImgBtn').disabled = true;
-            $('dImgBtn').textContent = 'Создание...';
+            $('dImgBtn').textContent = '⏳ Создание...';
+            
+            // Показываем результат с placeholder
+            show($('dImgResult'));
+            $('dGenImg').style.opacity = '0.3';
 
             const model = $('dImgModel').value;
             const url = OKAK.image(prompt, { model });
             
             const img = $('dGenImg');
+            
+            // Таймаут - пробуем turbo если flux долго
+            const timeout = setTimeout(() => {
+                if (model !== 'turbo') {
+                    toast('Пробуем быструю модель...', false);
+                    img.src = OKAK.image(prompt, { model: 'turbo' });
+                }
+            }, 20000);
+            
             img.onload = () => {
-                show($('dImgResult'));
+                clearTimeout(timeout);
+                img.style.opacity = '1';
                 $('dImgBtn').disabled = false;
                 $('dImgBtn').textContent = 'Создать';
                 incReqs();
             };
             img.onerror = () => {
-                toast('Ошибка', true);
-                $('dImgBtn').disabled = false;
-                $('dImgBtn').textContent = 'Создать';
+                clearTimeout(timeout);
+                if (model !== 'turbo') {
+                    img.src = OKAK.image(prompt, { model: 'turbo' });
+                } else {
+                    toast('Ошибка генерации', true);
+                    hide($('dImgResult'));
+                    $('dImgBtn').disabled = false;
+                    $('dImgBtn').textContent = 'Создать';
+                }
             };
             img.src = url;
         }
