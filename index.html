@@ -2667,14 +2667,18 @@ img.src = url;</pre>
         function testQR() {
             const data = $('qrData').value.trim();
             if (!data) return toast('Введите данные', true);
-            const color = $('qrColor').value || '000000';
+            let color = $('qrColor').value || '000000';
             const size = $('qrSize').value || 200;
+            
+            // Убираем # если есть
+            color = color.replace('#', '');
             
             // Показываем загрузку
             show($('qrResult'));
-            $('generatedQR').style.opacity = '0.3';
+            $('generatedQR').style.opacity = '0.5';
             
-            const url = OKAK.qr(data, { size: parseInt(size), color });
+            // Используем надёжный API напрямую
+            const url = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}&color=${color}&bgcolor=ffffff`;
             const img = $('generatedQR');
             
             img.onload = () => {
@@ -2712,7 +2716,7 @@ img.src = url;</pre>
             show($('cryptoResult'));
         }
 
-        // Weather
+        // Weather - РАБОТАЕТ!
         async function testWeather() {
             const city = $('weatherCity').value.trim();
             if (!city) return toast('Введите город', true);
@@ -2723,22 +2727,65 @@ img.src = url;</pre>
             $('weatherData').innerHTML = '<div class="text-center text-gray-400">🌤️ Загружаем погоду...</div>';
             
             try {
-                const w = await OKAK.weather(city);
+                // Шаг 1: Получаем координаты города
+                const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=ru`;
+                const geoResponse = await fetch(geoUrl);
+                const geoData = await geoResponse.json();
+                
+                if (!geoData.results || geoData.results.length === 0) {
+                    throw new Error('Город не найден');
+                }
+                
+                const { latitude, longitude, name, country } = geoData.results[0];
+                
+                // Шаг 2: Получаем погоду
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`;
+                const weatherResponse = await fetch(weatherUrl);
+                const weatherData = await weatherResponse.json();
+                
+                const current = weatherData.current;
+                
+                // Расшифровка погодных кодов
+                const weatherCodes = {
+                    0: { desc: 'Ясно', icon: '☀️' },
+                    1: { desc: 'Преимущественно ясно', icon: '🌤️' },
+                    2: { desc: 'Переменная облачность', icon: '⛅' },
+                    3: { desc: 'Пасмурно', icon: '☁️' },
+                    45: { desc: 'Туман', icon: '🌫️' },
+                    48: { desc: 'Изморозь', icon: '🌫️' },
+                    51: { desc: 'Лёгкая морось', icon: '🌧️' },
+                    53: { desc: 'Морось', icon: '🌧️' },
+                    55: { desc: 'Сильная морось', icon: '🌧️' },
+                    61: { desc: 'Небольшой дождь', icon: '🌧️' },
+                    63: { desc: 'Дождь', icon: '🌧️' },
+                    65: { desc: 'Сильный дождь', icon: '🌧️' },
+                    71: { desc: 'Небольшой снег', icon: '🌨️' },
+                    73: { desc: 'Снег', icon: '🌨️' },
+                    75: { desc: 'Сильный снег', icon: '❄️' },
+                    80: { desc: 'Ливень', icon: '🌧️' },
+                    81: { desc: 'Сильный ливень', icon: '⛈️' },
+                    82: { desc: 'Очень сильный ливень', icon: '⛈️' },
+                    95: { desc: 'Гроза', icon: '⛈️' },
+                    96: { desc: 'Гроза с градом', icon: '⛈️' }
+                };
+                
+                const weather = weatherCodes[current.weather_code] || { desc: 'Неизвестно', icon: '🌡️' };
+                
                 $('weatherData').innerHTML = `
                     <div class="text-center mb-4">
-                        <div class="text-4xl mb-2">${w.icon}</div>
-                        <div class="text-2xl font-bold">${w.temp}°C</div>
-                        <div class="text-gray-400">${w.description}</div>
-                        <div class="text-sm text-gray-500">${w.city}, ${w.country}</div>
+                        <div class="text-4xl mb-2">${weather.icon}</div>
+                        <div class="text-2xl font-bold">${Math.round(current.temperature_2m)}°C</div>
+                        <div class="text-gray-400">${weather.desc}</div>
+                        <div class="text-sm text-gray-500">${name}, ${country}</div>
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="p-2 bg-black/20 rounded-lg">💨 Ветер: ${w.wind} км/ч</div>
-                        <div class="p-2 bg-black/20 rounded-lg">💧 Влажность: ${w.humidity}%</div>
+                        <div class="p-2 bg-black/20 rounded-lg">💨 Ветер: ${Math.round(current.wind_speed_10m)} км/ч</div>
+                        <div class="p-2 bg-black/20 rounded-lg">💧 Влажность: ${current.relative_humidity_2m}%</div>
                     </div>
                 `;
                 toast('Погода загружена!');
             } catch (e) {
-                $('weatherData').innerHTML = `<div class="text-center text-red-400">❌ ${e.message}</div>`;
+                $('weatherData').innerHTML = `<div class="text-center text-red-400">❌ ${e.message || 'Ошибка загрузки'}</div>`;
             }
             
             $('weatherBtn').disabled = false;
@@ -2873,9 +2920,10 @@ img.src = url;</pre>
             if (!data) return toast('Введите данные', true);
             
             show($('dQrResult'));
-            $('dGenQR').style.opacity = '0.3';
+            $('dGenQR').style.opacity = '0.5';
             
-            const url = OKAK.qr(data, { size: 200, color: '667eea' });
+            // Используем надёжный API напрямую
+            const url = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data)}&color=667eea&bgcolor=ffffff`;
             const img = $('dGenQR');
             
             img.onload = () => {
