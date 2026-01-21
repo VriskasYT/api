@@ -21,7 +21,7 @@
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         @keyframes spin { to { transform: rotate(360deg); } }
         .spinner { animation: spin 1s linear infinite; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #1a1b2e; }
         ::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
         .tab-active { background: rgba(102, 126, 234, 0.2); color: white; border-color: #667eea; }
@@ -47,7 +47,236 @@
         }
         @media (max-width: 1024px) {
             .dashboard-content {
+                padding-top: 130px;
+            }
+        }
+        @media (max-width: 640px) {
+            .dashboard-content {
                 padding-top: 120px;
+            }
+        }
+        
+        /* ========== МОБИЛЬНАЯ АДАПТАЦИЯ ========== */
+        
+        /* Плавная прокрутка */
+        html {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Предотвращение зума на iOS */
+        @media screen and (-webkit-min-device-pixel-ratio: 0) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        
+        /* Touch-friendly элементы */
+        @media (pointer: coarse) {
+            button, .clickable, a {
+                min-height: 44px;
+            }
+        }
+        
+        /* Адаптация для телефонов */
+        @media (max-width: 640px) {
+            /* Навигация */
+            .nav-fixed {
+                height: 56px;
+            }
+            .content-with-nav {
+                padding-top: 56px;
+            }
+            
+            /* Заголовки */
+            h1 { font-size: 1.75rem !important; line-height: 1.2 !important; }
+            h2 { font-size: 1.5rem !important; }
+            h3 { font-size: 1.125rem !important; }
+            
+            /* Hero секция */
+            .pt-12 { padding-top: 1.5rem !important; }
+            .pb-20 { padding-bottom: 3rem !important; }
+            .mb-8 { margin-bottom: 1.5rem !important; }
+            .mb-10 { margin-bottom: 1.5rem !important; }
+            .mb-6 { margin-bottom: 1rem !important; }
+            
+            /* Карточки */
+            .glass.rounded-2xl.p-6 { padding: 1rem !important; }
+            .glass.rounded-2xl.p-8 { padding: 1.25rem !important; }
+            .glass.rounded-xl.p-6 { padding: 1rem !important; }
+            .glass.rounded-2xl.p-5 { padding: 0.875rem !important; }
+            
+            /* Статистика */
+            .text-3xl { font-size: 1.5rem !important; }
+            .text-2xl { font-size: 1.25rem !important; }
+            
+            /* Код блоки */
+            .code-block { 
+                padding: 0.75rem !important; 
+                font-size: 0.7rem !important;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .code-block pre { font-size: 0.7rem !important; }
+            
+            /* Кнопки */
+            .px-8.py-4 { padding: 0.875rem 1.5rem !important; }
+            .text-lg { font-size: 1rem !important; }
+            
+            /* Табы документации */
+            .doc-tab, .docs-tab {
+                padding: 0.5rem 0.75rem !important;
+                font-size: 0.75rem !important;
+            }
+            
+            /* Playground карточки */
+            .grid.lg\\:grid-cols-2 { gap: 1rem !important; }
+            
+            /* Текстовые поля */
+            textarea { min-height: 100px !important; }
+            
+            /* Модальные окна */
+            .max-w-md, .max-w-lg { 
+                max-width: 95% !important; 
+                margin: 1rem !important;
+            }
+            .fixed.inset-0 .p-8 { padding: 1.25rem !important; }
+            
+            /* Фичи карточки */
+            .w-14.h-14 { width: 3rem !important; height: 3rem !important; }
+            .text-2xl { font-size: 1.25rem !important; }
+            
+            /* Секции */
+            .py-20 { padding-top: 2.5rem !important; padding-bottom: 2.5rem !important; }
+            
+            /* Отступы */
+            .px-4 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+            .gap-6 { gap: 1rem !important; }
+            .gap-4 { gap: 0.75rem !important; }
+            
+            /* Гриды */
+            .grid.sm\\:grid-cols-2 { grid-template-columns: 1fr !important; }
+            .grid.lg\\:grid-cols-3 { grid-template-columns: 1fr !important; }
+            
+            /* Dashboard мобильная навигация */
+            .mob-nav {
+                padding: 0.5rem 0.75rem !important;
+                font-size: 1rem !important;
+            }
+            
+            /* Footer */
+            footer { padding: 1.5rem 0.75rem !important; }
+            footer .text-sm { font-size: 0.75rem !important; }
+        }
+        
+        /* Очень маленькие экраны */
+        @media (max-width: 380px) {
+            h1 { font-size: 1.5rem !important; }
+            .text-3xl { font-size: 1.25rem !important; }
+            .glass.rounded-2xl.p-6, 
+            .glass.rounded-2xl.p-8 { padding: 0.875rem !important; }
+            
+            /* Кнопки в ряд */
+            .flex.flex-col.sm\\:flex-row { gap: 0.5rem !important; }
+            .flex.flex-col.sm\\:flex-row button,
+            .flex.flex-col.sm\\:flex-row a { 
+                padding: 0.75rem 1rem !important; 
+                font-size: 0.875rem !important;
+            }
+            
+            /* Табы */
+            .doc-tab, .docs-tab {
+                padding: 0.4rem 0.6rem !important;
+                font-size: 0.65rem !important;
+            }
+        }
+        
+        /* Горизонтальная прокрутка табов */
+        .flex.flex-wrap.gap-2.mb-6 {
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding-bottom: 0.5rem;
+        }
+        .flex.flex-wrap.gap-2.mb-6::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* Dashboard на мобильных */
+        @media (max-width: 1024px) {
+            /* Мобильная навигация dashboard */
+            .mob-nav {
+                flex-shrink: 0;
+            }
+            
+            /* Боковая панель скрыта */
+            aside.fixed { display: none !important; }
+            
+            /* Основной контент на всю ширину */
+            main.flex-1 { margin-left: 0 !important; }
+            
+            /* Dashboard карточки */
+            #dash-overview .grid.lg\\:grid-cols-2 { grid-template-columns: 1fr !important; }
+            #dash-play .grid.lg\\:grid-cols-2 { grid-template-columns: 1fr !important; }
+        }
+        
+        /* Улучшенная прокрутка для code-block */
+        .code-block {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Анимация для кнопок на тач устройствах */
+        @media (hover: none) {
+            .card-hover:hover { 
+                transform: none; 
+                box-shadow: none; 
+            }
+            .card-hover:active {
+                transform: scale(0.98);
+                opacity: 0.9;
+            }
+        }
+        
+        /* Toast на мобильных */
+        @media (max-width: 640px) {
+            #toast {
+                left: 1rem !important;
+                right: 1rem !important;
+                bottom: 1rem !important;
+            }
+            #toast .glass {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        /* Модальные окна - полноэкранные на мобильных */
+        @media (max-width: 640px) {
+            #authModal > div,
+            #keyModal > div,
+            #projModal > div {
+                max-height: 90vh;
+                overflow-y: auto;
+                margin: 1rem;
+            }
+        }
+        
+        /* Улучшенные инпуты на мобильных */
+        input, select, textarea {
+            -webkit-appearance: none;
+            border-radius: 0.75rem;
+        }
+        
+        /* Исправление для iOS safe area */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            body {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            #toast {
+                bottom: calc(1rem + env(safe-area-inset-bottom)) !important;
             }
         }
     </style>
@@ -193,14 +422,14 @@
                 <h2 class="text-3xl sm:text-4xl font-bold text-center mb-4">📚 Документация</h2>
                 <p class="text-gray-400 text-center mb-12">Простая интеграция за минуты</p>
 
-                <div class="glass rounded-2xl p-6 sm:p-8">
-                    <div class="flex flex-wrap gap-2 mb-6 border-b border-white/10 pb-4">
-                        <button onclick="showDocTab('quick')" class="doc-tab px-4 py-2 rounded-lg text-sm transition tab-active" data-tab="quick">Быстрый старт</button>
-                        <button onclick="showDocTab('ai')" class="doc-tab px-4 py-2 rounded-lg text-sm transition text-gray-400 hover:text-white" data-tab="ai">AI API</button>
-                        <button onclick="showDocTab('image')" class="doc-tab px-4 py-2 rounded-lg text-sm transition text-gray-400 hover:text-white" data-tab="image">Image API</button>
-                        <button onclick="showDocTab('db')" class="doc-tab px-4 py-2 rounded-lg text-sm transition text-gray-400 hover:text-white" data-tab="db">Database</button>
-                        <button onclick="showDocTab('qr')" class="doc-tab px-4 py-2 rounded-lg text-sm transition text-gray-400 hover:text-white" data-tab="qr">QR API</button>
-                        <button onclick="showDocTab('crypto')" class="doc-tab px-4 py-2 rounded-lg text-sm transition text-gray-400 hover:text-white" data-tab="crypto">Crypto</button>
+                <div class="glass rounded-2xl p-4 sm:p-6 md:p-8">
+                    <div class="flex gap-2 mb-4 sm:mb-6 border-b border-white/10 pb-3 sm:pb-4 overflow-x-auto" style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+                        <button onclick="showDocTab('quick')" class="doc-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition tab-active whitespace-nowrap flex-shrink-0" data-tab="quick">🚀 Старт</button>
+                        <button onclick="showDocTab('ai')" class="doc-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition text-gray-400 hover:text-white whitespace-nowrap flex-shrink-0" data-tab="ai">🧠 AI</button>
+                        <button onclick="showDocTab('image')" class="doc-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition text-gray-400 hover:text-white whitespace-nowrap flex-shrink-0" data-tab="image">🎨 Image</button>
+                        <button onclick="showDocTab('db')" class="doc-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition text-gray-400 hover:text-white whitespace-nowrap flex-shrink-0" data-tab="db">🗄️ DB</button>
+                        <button onclick="showDocTab('qr')" class="doc-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition text-gray-400 hover:text-white whitespace-nowrap flex-shrink-0" data-tab="qr">📱 QR</button>
+                        <button onclick="showDocTab('crypto')" class="doc-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm transition text-gray-400 hover:text-white whitespace-nowrap flex-shrink-0" data-tab="crypto">🔐 Crypto</button>
                     </div>
 
                     <div id="docContent">
@@ -514,14 +743,35 @@ GET /api/crypto/uuid?key=YOUR_KEY</pre>
             </aside>
 
             <!-- Mobile nav -->
-            <div class="lg:hidden fixed top-16 left-0 right-0 glass border-b border-white/10 p-2 flex gap-2 overflow-x-auto z-40">
-                <button onclick="showDash('overview')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap bg-purple-500/20" data-section="overview">📊</button>
-                <button onclick="showDash('keys')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap text-gray-400" data-section="keys">🔑</button>
-                <button onclick="showDash('projects')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap text-gray-400" data-section="projects">📁</button>
-                <button onclick="showDash('database')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap text-gray-400" data-section="database">🗄️</button>
-                <button onclick="showDash('play')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap text-gray-400" data-section="play">🎮</button>
-                <button onclick="showDash('docs')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap text-gray-400" data-section="docs">📚</button>
-                <button onclick="showDash('settings')" class="mob-nav px-4 py-2 rounded-lg text-sm whitespace-nowrap text-gray-400" data-section="settings">⚙️</button>
+            <div class="lg:hidden fixed top-14 left-0 right-0 glass border-b border-white/10 py-2 px-1 flex gap-1 overflow-x-auto z-40" style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+                <button onclick="showDash('overview')" class="mob-nav px-3 py-2 rounded-xl text-xs whitespace-nowrap bg-purple-500/20 flex flex-col items-center gap-1 min-w-[60px]" data-section="overview">
+                    <span class="text-base">📊</span>
+                    <span class="text-[10px]">Обзор</span>
+                </button>
+                <button onclick="showDash('keys')" class="mob-nav px-3 py-2 rounded-xl text-xs whitespace-nowrap text-gray-400 flex flex-col items-center gap-1 min-w-[60px]" data-section="keys">
+                    <span class="text-base">🔑</span>
+                    <span class="text-[10px]">Ключи</span>
+                </button>
+                <button onclick="showDash('projects')" class="mob-nav px-3 py-2 rounded-xl text-xs whitespace-nowrap text-gray-400 flex flex-col items-center gap-1 min-w-[60px]" data-section="projects">
+                    <span class="text-base">📁</span>
+                    <span class="text-[10px]">Проекты</span>
+                </button>
+                <button onclick="showDash('database')" class="mob-nav px-3 py-2 rounded-xl text-xs whitespace-nowrap text-gray-400 flex flex-col items-center gap-1 min-w-[60px]" data-section="database">
+                    <span class="text-base">🗄️</span>
+                    <span class="text-[10px]">БД</span>
+                </button>
+                <button onclick="showDash('play')" class="mob-nav px-3 py-2 rounded-xl text-xs whitespace-nowrap text-gray-400 flex flex-col items-center gap-1 min-w-[60px]" data-section="play">
+                    <span class="text-base">🎮</span>
+                    <span class="text-[10px]">Тест</span>
+                </button>
+                <button onclick="showDash('docs')" class="mob-nav px-3 py-2 rounded-xl text-xs whitespace-nowrap text-gray-400 flex flex-col items-center gap-1 min-w-[60px]" data-section="docs">
+                    <span class="text-base">📚</span>
+                    <span class="text-[10px]">Доки</span>
+                </button>
+                <button onclick="showDash('settings')" class="mob-nav px-3 py-2 rounded-xl text-xs whitespace-nowrap text-gray-400 flex flex-col items-center gap-1 min-w-[60px]" data-section="settings">
+                    <span class="text-base">⚙️</span>
+                    <span class="text-[10px]">Настройки</span>
+                </button>
             </div>
 
             <!-- Main -->
@@ -715,13 +965,13 @@ GET /api/crypto/uuid?key=YOUR_KEY</pre>
                             <p class="text-gray-400 text-sm">Полное руководство по API</p>
                         </div>
 
-                        <div class="glass rounded-2xl p-6">
-                            <div class="flex flex-wrap gap-2 mb-6 border-b border-white/10 pb-4">
-                                <button onclick="showDocsTab('intro')" class="docs-tab px-4 py-2 rounded-lg text-sm tab-active" data-tab="intro">Введение</button>
-                                <button onclick="showDocsTab('auth')" class="docs-tab px-4 py-2 rounded-lg text-sm text-gray-400" data-tab="auth">Аутентификация</button>
-                                <button onclick="showDocsTab('endpoints')" class="docs-tab px-4 py-2 rounded-lg text-sm text-gray-400" data-tab="endpoints">Endpoints</button>
-                                <button onclick="showDocsTab('errors')" class="docs-tab px-4 py-2 rounded-lg text-sm text-gray-400" data-tab="errors">Ошибки</button>
-                                <button onclick="showDocsTab('examples')" class="docs-tab px-4 py-2 rounded-lg text-sm text-gray-400" data-tab="examples">Примеры</button>
+                        <div class="glass rounded-2xl p-4 sm:p-6">
+                            <div class="flex gap-2 mb-4 sm:mb-6 border-b border-white/10 pb-3 sm:pb-4 overflow-x-auto" style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+                                <button onclick="showDocsTab('intro')" class="docs-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm tab-active whitespace-nowrap flex-shrink-0" data-tab="intro">📖 Введение</button>
+                                <button onclick="showDocsTab('auth')" class="docs-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm text-gray-400 whitespace-nowrap flex-shrink-0" data-tab="auth">🔐 Auth</button>
+                                <button onclick="showDocsTab('endpoints')" class="docs-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm text-gray-400 whitespace-nowrap flex-shrink-0" data-tab="endpoints">📡 API</button>
+                                <button onclick="showDocsTab('errors')" class="docs-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm text-gray-400 whitespace-nowrap flex-shrink-0" data-tab="errors">❌ Ошибки</button>
+                                <button onclick="showDocsTab('examples')" class="docs-tab px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm text-gray-400 whitespace-nowrap flex-shrink-0" data-tab="examples">💡 Примеры</button>
                             </div>
 
                             <div id="docsContent">
@@ -1001,8 +1251,8 @@ img.src = url;</pre>
     </div>
 
     <!-- Auth Modal -->
-    <div id="authModal" class="fixed inset-0 bg-black/80 z-[1001] flex items-center justify-center p-4 hidden">
-        <div class="glass rounded-2xl p-8 max-w-md w-full relative fade-in">
+    <div id="authModal" class="fixed inset-0 bg-black/80 z-[1001] flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
+        <div class="glass rounded-2xl p-5 sm:p-8 max-w-md w-full relative fade-in my-4">
             <button onclick="closeModal('authModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
             
             <div id="loginForm">
@@ -1127,8 +1377,8 @@ img.src = url;</pre>
     </div>
 
     <!-- Project Modal -->
-    <div id="projModal" class="fixed inset-0 bg-black/80 z-[1001] flex items-center justify-center p-4 hidden">
-        <div class="glass rounded-2xl p-8 max-w-md w-full relative fade-in">
+    <div id="projModal" class="fixed inset-0 bg-black/80 z-[1001] flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
+        <div class="glass rounded-2xl p-5 sm:p-8 max-w-md w-full relative fade-in my-4">
             <button onclick="closeModal('projModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
             
             <h2 class="text-2xl font-bold mb-6">📁 Новый проект</h2>
@@ -1145,10 +1395,10 @@ img.src = url;</pre>
     </div>
 
     <!-- Toast -->
-    <div id="toast" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-300 z-[1002]">
-        <div class="glass rounded-xl px-6 py-4 flex items-center gap-3">
+    <div id="toast" class="fixed bottom-4 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 transform translate-y-20 opacity-0 transition-all duration-300 z-[1002]">
+        <div class="glass rounded-xl px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-center sm:justify-start gap-2 sm:gap-3">
             <span id="toastIcon">✅</span>
-            <span id="toastMsg">Успешно!</span>
+            <span id="toastMsg" class="text-sm sm:text-base">Успешно!</span>
         </div>
     </div>
 
