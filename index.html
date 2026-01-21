@@ -2597,21 +2597,26 @@ img.src = url;</pre>
             $('aiBtnText').textContent = 'Генерация...';
             show($('aiLoader'));
             show($('aiResult'));
-            $('aiResult').textContent = '🤔 Думаю... (это может занять до 30 сек)';
+            $('aiResult').textContent = '🤔 Думаю...';
 
             try {
                 const model = $('aiModel').value;
-                // Используем OKAK.ai с автоматическими повторами и fallback
-                const text = await OKAK.ai(prompt, model);
-                $('aiResult').textContent = text || 'Пустой ответ. Попробуйте другой запрос.';
+                // Используем стриминг для плавного вывода
+                await OKAK.aiStream(prompt, model, (text, done) => {
+                    $('aiResult').textContent = text || '...';
+                    if (done) {
+                        $('aiBtn').disabled = false;
+                        $('aiBtnText').textContent = 'Сгенерировать';
+                        hide($('aiLoader'));
+                    }
+                });
             } catch (e) {
                 console.error('AI Error:', e);
                 $('aiResult').textContent = '❌ Ошибка генерации. Попробуйте:\n• Другую модель (Mistral обычно быстрее)\n• Упростить запрос\n• Повторить через минуту';
+                $('aiBtn').disabled = false;
+                $('aiBtnText').textContent = 'Сгенерировать';
+                hide($('aiLoader'));
             }
-
-            $('aiBtn').disabled = false;
-            $('aiBtnText').textContent = 'Сгенерировать';
-            hide($('aiLoader'));
         }
 
         async function testImage() {
@@ -2854,20 +2859,25 @@ img.src = url;</pre>
             $('dAiBtn').disabled = true;
             $('dAiBtn').textContent = '⏳ Генерация...';
             show($('dAiResult'));
-            $('dAiResult').textContent = '🤔 Обрабатываю запрос... (до 30 сек)';
+            $('dAiResult').textContent = '🤔 Думаю...';
 
             try {
                 const model = $('dAiModel').value;
-                const text = await OKAK.ai(prompt, model);
-                $('dAiResult').textContent = text || 'Пустой ответ';
-                trackUsage('ai', 'AI генерация текста', prompt.substring(0, 50) + '...');
+                // Используем стриминг для плавного вывода
+                await OKAK.aiStream(prompt, model, (text, done) => {
+                    $('dAiResult').textContent = text || '...';
+                    if (done) {
+                        trackUsage('ai', 'AI генерация текста', prompt.substring(0, 50) + '...');
+                        $('dAiBtn').disabled = false;
+                        $('dAiBtn').textContent = 'Генерировать';
+                    }
+                });
             } catch (e) {
                 console.error('AI Error:', e);
                 $('dAiResult').textContent = '❌ Ошибка. Попробуйте другую модель или упростите запрос.';
+                $('dAiBtn').disabled = false;
+                $('dAiBtn').textContent = 'Генерировать';
             }
-
-            $('dAiBtn').disabled = false;
-            $('dAiBtn').textContent = 'Генерировать';
         }
 
         async function dTestImg() {
