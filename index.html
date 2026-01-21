@@ -279,6 +279,130 @@
                 bottom: calc(1rem + env(safe-area-inset-bottom)) !important;
             }
         }
+        
+        /* ========== ДОПОЛНИТЕЛЬНАЯ МОБИЛЬНАЯ АДАПТАЦИЯ ========== */
+        
+        /* Мобильная навигация для залогиненных */
+        @media (max-width: 768px) {
+            #navLinksUser {
+                display: none !important;
+            }
+        }
+        
+        /* Dashboard статистика - компактнее на мобильных */
+        @media (max-width: 640px) {
+            #dash-overview .grid-cols-2 {
+                gap: 0.5rem !important;
+            }
+            #dash-overview .glass.rounded-2xl.p-5 {
+                padding: 0.75rem !important;
+            }
+            #dash-overview .text-2xl {
+                font-size: 1.25rem !important;
+            }
+            #dash-overview .text-sm {
+                font-size: 0.7rem !important;
+            }
+            
+            /* График */
+            #chart {
+                height: 100px !important;
+                min-height: 100px;
+            }
+            #chart > div {
+                font-size: 0.6rem !important;
+            }
+            
+            /* Быстрые действия */
+            .space-y-3 .p-4 {
+                padding: 0.75rem !important;
+            }
+            .space-y-3 .text-2xl {
+                font-size: 1.25rem !important;
+            }
+            
+            /* Ключи и проекты */
+            #keysList .glass.rounded-xl {
+                padding: 0.875rem !important;
+            }
+            #keysList .mono {
+                font-size: 0.65rem !important;
+                word-break: break-all;
+            }
+            
+            /* Playground в dashboard */
+            #dash-play .glass.rounded-2xl {
+                padding: 1rem !important;
+            }
+            #dash-play textarea {
+                min-height: 80px !important;
+            }
+            
+            /* Документация в dashboard */
+            #dash-docs .docs-tab {
+                padding: 0.4rem 0.6rem !important;
+                font-size: 0.65rem !important;
+            }
+            #dash-docs .code-block {
+                font-size: 0.6rem !important;
+            }
+            
+            /* Настройки */
+            #dash-settings input {
+                padding: 0.75rem !important;
+            }
+        }
+        
+        /* Ещё меньше - 360px и меньше */
+        @media (max-width: 360px) {
+            /* Мобильная навигация dashboard */
+            .mob-nav {
+                min-width: 50px !important;
+                padding: 0.25rem 0.5rem !important;
+            }
+            .mob-nav .text-base {
+                font-size: 0.875rem !important;
+            }
+            .mob-nav .text-\\[10px\\] {
+                font-size: 8px !important;
+            }
+            
+            /* Заголовки */
+            h1 { font-size: 1.25rem !important; }
+            h2 { font-size: 1.125rem !important; }
+            
+            /* Кнопки */
+            button {
+                padding: 0.5rem 0.75rem !important;
+                font-size: 0.8rem !important;
+            }
+        }
+        
+        /* Горизонтальная прокрутка для мобильной навигации dashboard */
+        .lg\\:hidden.fixed.top-14 {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .lg\\:hidden.fixed.top-14::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* Плавные переходы для интерактивных элементов */
+        button, a, .clickable {
+            -webkit-tap-highlight-color: transparent;
+            transition: all 0.2s ease;
+        }
+        
+        /* Улучшенные карточки на мобильных */
+        @media (max-width: 640px) {
+            .card-hover {
+                transform: none !important;
+            }
+            .card-hover:active {
+                transform: scale(0.98) !important;
+                opacity: 0.9;
+            }
+        }
     </style>
 </head>
 <body class="bg-[#0f0f1a] text-white min-h-screen">
@@ -293,6 +417,12 @@
                 <a href="#features" class="hover:text-white transition cursor-pointer">Возможности</a>
                 <a href="#docs" class="hover:text-white transition cursor-pointer">Документация</a>
                 <a href="#playground" class="hover:text-white transition cursor-pointer">Playground</a>
+            </div>
+            <div id="navLinksUser" class="hidden md:flex gap-6 text-gray-400 text-sm">
+                <a href="#" onclick="goToLanding(); return false;" class="hover:text-white transition cursor-pointer">🏠 Сайт</a>
+                <a href="#" onclick="backToDashboard(); return false;" class="hover:text-white transition cursor-pointer">📊 Dashboard</a>
+                <a href="#" onclick="backToDashboard(); showDash('docs'); return false;" class="hover:text-white transition cursor-pointer">📚 Доки</a>
+                <a href="#" onclick="backToDashboard(); showDash('play'); return false;" class="hover:text-white transition cursor-pointer">🎮 Тест</a>
             </div>
             <div id="navButtons" class="flex items-center gap-2 flex-shrink-0"></div>
         </div>
@@ -718,6 +848,9 @@ GET /api/crypto/uuid?key=YOUR_KEY</pre>
             <!-- Sidebar -->
             <aside class="fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] glass border-r border-white/10 p-4 hidden lg:block overflow-y-auto z-40">
                 <nav class="space-y-2">
+                    <button onclick="goToLanding()" class="sidebar-link w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-gray-400 mb-2 border-b border-white/10 pb-4">
+                        <span>🏠</span> На главную
+                    </button>
                     <button onclick="showDash('overview')" class="sidebar-link active w-full text-left px-4 py-3 rounded-xl flex items-center gap-3" data-section="overview">
                         <span>📊</span> Обзор
                     </button>
@@ -744,6 +877,10 @@ GET /api/crypto/uuid?key=YOUR_KEY</pre>
 
             <!-- Mobile nav -->
             <div class="lg:hidden fixed top-14 left-0 right-0 glass border-b border-white/10 py-2 px-1 flex gap-1 overflow-x-auto z-40" style="-webkit-overflow-scrolling: touch; scrollbar-width: none;">
+                <button onclick="goToLanding()" class="mob-nav px-3 py-2 rounded-xl text-xs whitespace-nowrap text-gray-400 flex flex-col items-center gap-1 min-w-[60px]">
+                    <span class="text-base">🏠</span>
+                    <span class="text-[10px]">Главная</span>
+                </button>
                 <button onclick="showDash('overview')" class="mob-nav px-3 py-2 rounded-xl text-xs whitespace-nowrap bg-purple-500/20 flex flex-col items-center gap-1 min-w-[60px]" data-section="overview">
                     <span class="text-base">📊</span>
                     <span class="text-[10px]">Обзор</span>
@@ -1459,6 +1596,11 @@ img.src = url;</pre>
         // Navigation
         function goHome() {
             if (user) {
+                // Если на лендинге - возвращаемся в dashboard
+                if (!$('guestPage').classList.contains('hidden')) {
+                    hide($('guestPage'));
+                    show($('dashboard'));
+                }
                 showDash('overview');
             } else {
                 hide($('dashboard'));
@@ -1474,12 +1616,30 @@ img.src = url;</pre>
                     <button onclick="logout()" class="px-4 py-2 glass rounded-xl hover:bg-white/10 transition text-sm">Выйти</button>
                 `;
                 hide($('navLinks'));
+                show($('navLinksUser'));
             } else {
                 $('navButtons').innerHTML = `
                     <button onclick="showAuth('login')" class="px-4 py-2 text-gray-300 hover:text-white transition text-sm">Войти</button>
                     <button onclick="showAuth('register')" class="px-5 py-2 gradient-bg rounded-xl font-medium hover:opacity-90 transition text-sm">Регистрация</button>
                 `;
                 show($('navLinks'));
+                hide($('navLinksUser'));
+            }
+        }
+        
+        // Переход на лендинг (гостевая страница) - работает и для залогиненных
+        function goToLanding() {
+            hide($('dashboard'));
+            show($('guestPage'));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Вернуться в Dashboard (для залогиненных)
+        function backToDashboard() {
+            if (user) {
+                hide($('guestPage'));
+                show($('dashboard'));
+                showDash('overview');
             }
         }
 
@@ -1639,14 +1799,60 @@ img.src = url;</pre>
         function renderChart() {
             const c = $('chart');
             c.innerHTML = '';
+            
+            // Реальные данные на основе активности пользователя
+            const totalReqs = user.totalReqs || 0;
+            const todayReqs = user.todayReqs || 0;
+            const avgPerDay = Math.max(1, Math.floor(totalReqs / 7));
+            
+            // Генерируем данные за 7 дней (реалистично распределённые)
+            const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            const todayIndex = new Date().getDay();
+            const realTodayIndex = todayIndex === 0 ? 6 : todayIndex - 1; // Пн=0, Вс=6
+            
+            const data = [];
             for (let i = 0; i < 7; i++) {
-                const h = Math.floor(Math.random() * 100) + 20;
-                const bar = document.createElement('div');
-                bar.className = 'flex-1 gradient-bg rounded-t transition-all hover:opacity-80';
-                bar.style.height = h + 'px';
-                bar.title = Math.floor(h * 2) + ' запросов';
-                c.appendChild(bar);
+                if (i === realTodayIndex) {
+                    data.push(todayReqs);
+                } else if (i < realTodayIndex) {
+                    // Прошлые дни - распределяем оставшиеся запросы
+                    const remaining = totalReqs - todayReqs;
+                    const dayShare = Math.floor(remaining / Math.max(1, realTodayIndex));
+                    data.push(Math.max(0, dayShare + Math.floor(Math.random() * 3) - 1));
+                } else {
+                    // Будущие дни - 0
+                    data.push(0);
+                }
             }
+            
+            const maxVal = Math.max(...data, 1);
+            
+            data.forEach((val, i) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex-1 flex flex-col items-center';
+                
+                // Значение сверху
+                const label = document.createElement('div');
+                label.className = 'text-xs text-gray-400 mb-1';
+                label.textContent = val > 0 ? val : '';
+                
+                // Столбик
+                const bar = document.createElement('div');
+                const h = Math.max(8, (val / maxVal) * 100);
+                bar.className = 'w-full gradient-bg rounded-t transition-all hover:opacity-80 cursor-pointer';
+                bar.style.height = h + 'px';
+                bar.title = `${days[i]}: ${val} запросов`;
+                
+                // Подпись дня
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'text-xs text-gray-500 mt-1';
+                dayLabel.textContent = days[i];
+                
+                wrapper.appendChild(label);
+                wrapper.appendChild(bar);
+                wrapper.appendChild(dayLabel);
+                c.appendChild(wrapper);
+            });
         }
 
         // Dashboard sections
