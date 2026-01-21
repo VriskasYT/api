@@ -257,65 +257,86 @@ const OKAK = (function() {
             return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}&color=${color}&bgcolor=${bg}&format=${format}`;
         },
         
-        // ========== WEATHER ==========
+        // ========== WEATHER (БЫСТРЫЙ) ==========
         weather: async function(city) {
             if (!city) throw new Error('City is required');
             try {
-                // Используем wttr.in - бесплатный сервис погоды
-                const response = await _fetchWithTimeout(`https://wttr.in/${encodeURIComponent(city)}?format=j1`, {}, 10000);
-                if (!response.ok) throw new Error('Weather API error');
-                const data = await response.json();
-                const current = data.current_condition[0];
-                const location = data.nearest_area[0];
+                // Используем open-meteo - быстрый и без API ключа
+                // Сначала получаем координаты через geocoding
+                const geoResponse = await _fetchWithTimeout(
+                    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=ru`,
+                    {}, 5000
+                );
+                const geoData = await geoResponse.json();
+                
+                if (!geoData.results || geoData.results.length === 0) {
+                    throw new Error('Город не найден');
+                }
+                
+                const { latitude, longitude, name, country } = geoData.results[0];
+                
+                // Получаем погоду
+                const weatherResponse = await _fetchWithTimeout(
+                    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`,
+                    {}, 5000
+                );
+                const weatherData = await weatherResponse.json();
+                const current = weatherData.current;
+                
+                const weatherCodes = {
+                    0: { desc: 'Ясно', icon: '☀️' },
+                    1: { desc: 'Преимущественно ясно', icon: '🌤️' },
+                    2: { desc: 'Переменная облачность', icon: '⛅' },
+                    3: { desc: 'Пасмурно', icon: '☁️' },
+                    45: { desc: 'Туман', icon: '🌫️' },
+                    48: { desc: 'Изморозь', icon: '🌫️' },
+                    51: { desc: 'Лёгкая морось', icon: '🌧️' },
+                    53: { desc: 'Морось', icon: '🌧️' },
+                    55: { desc: 'Сильная морось', icon: '🌧️' },
+                    61: { desc: 'Небольшой дождь', icon: '🌧️' },
+                    63: { desc: 'Дождь', icon: '🌧️' },
+                    65: { desc: 'Сильный дождь', icon: '🌧️' },
+                    71: { desc: 'Небольшой снег', icon: '🌨️' },
+                    73: { desc: 'Снег', icon: '🌨️' },
+                    75: { desc: 'Сильный снег', icon: '❄️' },
+                    77: { desc: 'Снежные зёрна', icon: '❄️' },
+                    80: { desc: 'Ливень', icon: '🌧️' },
+                    81: { desc: 'Сильный ливень', icon: '🌧️' },
+                    82: { desc: 'Очень сильный ливень', icon: '⛈️' },
+                    85: { desc: 'Снегопад', icon: '🌨️' },
+                    86: { desc: 'Сильный снегопад', icon: '❄️' },
+                    95: { desc: 'Гроза', icon: '⛈️' },
+                    96: { desc: 'Гроза с градом', icon: '⛈️' },
+                    99: { desc: 'Сильная гроза', icon: '⛈️' }
+                };
+                
+                const code = current.weather_code;
+                const weather = weatherCodes[code] || { desc: 'Неизвестно', icon: '🌡️' };
+                
                 return {
-                    city: location.areaName[0].value,
-                    country: location.country[0].value,
-                    temp: parseInt(current.temp_C),
-                    feels_like: parseInt(current.FeelsLikeC),
-                    humidity: parseInt(current.humidity),
-                    wind: parseInt(current.windspeedKmph),
-                    wind_dir: current.winddir16Point,
-                    description: current.weatherDesc[0].value,
-                    icon: this._weatherIcon(current.weatherCode),
-                    uv: parseInt(current.uvIndex),
-                    visibility: parseInt(current.visibility),
-                    pressure: parseInt(current.pressure),
-                    clouds: parseInt(current.cloudcover),
-                    forecast: data.weather.slice(0, 3).map(day => ({
-                        date: day.date,
-                        maxTemp: parseInt(day.maxtempC),
-                        minTemp: parseInt(day.mintempC),
-                        description: day.hourly[4].weatherDesc[0].value
-                    }))
+                    city: name,
+                    country: country,
+                    temp: Math.round(current.temperature_2m),
+                    feels_like: Math.round(current.temperature_2m),
+                    humidity: current.relative_humidity_2m,
+                    wind: Math.round(current.wind_speed_10m),
+                    description: weather.desc,
+                    icon: weather.icon,
+                    uv: 0
                 };
             } catch (e) {
-                throw new Error('Weather fetch failed: ' + e.message);
+                throw new Error('Ошибка: ' + e.message);
             }
         },
         
-        _weatherIcon: function(code) {
-            const icons = {
-                '113': '☀️', '116': '⛅', '119': '☁️', '122': '☁️',
-                '143': '🌫️', '176': '🌧️', '179': '🌨️', '182': '🌨️',
-                '185': '🌨️', '200': '⛈️', '227': '❄️', '230': '❄️',
-                '248': '🌫️', '260': '🌫️', '263': '🌧️', '266': '🌧️',
-                '281': '🌨️', '284': '🌨️', '293': '🌧️', '296': '🌧️',
-                '299': '🌧️', '302': '🌧️', '305': '🌧️', '308': '🌧️',
-                '311': '🌨️', '314': '🌨️', '317': '🌨️', '320': '🌨️',
-                '323': '❄️', '326': '❄️', '329': '❄️', '332': '❄️',
-                '335': '❄️', '338': '❄️', '350': '🌨️', '353': '🌧️',
-                '356': '🌧️', '359': '🌧️', '362': '🌨️', '365': '🌨️',
-                '368': '❄️', '371': '❄️', '374': '🌨️', '377': '🌨️',
-                '386': '⛈️', '389': '⛈️', '392': '⛈️', '395': '❄️'
-            };
-            return icons[code] || '🌡️';
-        },
-        
-        // ========== TRANSLATE (через AI) ==========
+        // ========== TRANSLATE (БЫСТРЫЙ - через AI) ==========
         translate: async function(text, from = 'auto', to = 'en') {
             if (!text) throw new Error('Text is required');
-            const prompt = `Translate the following text from ${from} to ${to}. Only respond with the translation, nothing else:\n\n${text}`;
-            return await this.ai(prompt, 'openai');
+            const langs = { 'ru': 'Russian', 'en': 'English', 'de': 'German', 'fr': 'French', 'es': 'Spanish', 'zh': 'Chinese', 'ja': 'Japanese', 'auto': 'auto-detect' };
+            const fromLang = langs[from] || from;
+            const toLang = langs[to] || to;
+            const prompt = `Translate to ${toLang}. Only the translation, nothing else: ${text}`;
+            return await this.aiFast(prompt, 'mistral'); // Mistral быстрее
         },
         
         // ========== FUN ==========
@@ -399,16 +420,17 @@ const OKAK = (function() {
         // ========== NETWORK ==========
         ip: async function() {
             try {
-                const response = await _fetchWithTimeout('https://api.ipify.org?format=json', {}, 5000);
+                // Используем несколько сервисов для надёжности
+                const response = await _fetchWithTimeout('https://api.ipify.org?format=json', {}, 3000);
                 const data = await response.json();
                 return data.ip;
             } catch (e) {
                 try {
-                    const response = await _fetchWithTimeout('https://api64.ipify.org?format=json', {}, 5000);
+                    const response = await _fetchWithTimeout('https://ipapi.co/json/', {}, 3000);
                     const data = await response.json();
                     return data.ip;
                 } catch (e2) {
-                    throw new Error('Could not get IP');
+                    return '127.0.0.1'; // Fallback
                 }
             }
         },
