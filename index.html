@@ -471,7 +471,7 @@
                         <div class="text-gray-400 text-sm mt-1">Навсегда</div>
                     </div>
                     <div class="glass rounded-2xl p-6 card-hover">
-                        <div class="text-3xl font-bold gradient-text">10+</div>
+                        <div class="text-3xl font-bold gradient-text">20+</div>
                         <div class="text-gray-400 text-sm mt-1">API сервисов</div>
                     </div>
                     <div class="glass rounded-2xl p-6 card-hover">
@@ -612,6 +612,36 @@
                         <div class="flex flex-wrap gap-2">
                             <span class="px-3 py-1 bg-violet-500/20 rounded-full text-xs text-violet-300">UUID</span>
                             <span class="px-3 py-1 bg-fuchsia-500/20 rounded-full text-xs text-fuchsia-300">Base64</span>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-8 card-hover">
+                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center text-2xl mb-6">🌤️</div>
+                        <h3 class="text-xl font-bold mb-3">OKAK Weather</h3>
+                        <p class="text-gray-400 text-sm mb-4">Погода в любом городе мира. Температура, влажность, прогноз.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-sky-500/20 rounded-full text-xs text-sky-300">Realtime</span>
+                            <span class="px-3 py-1 bg-amber-500/20 rounded-full text-xs text-amber-300">Forecast</span>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-8 card-hover">
+                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center text-2xl mb-6">🌍</div>
+                        <h3 class="text-xl font-bold mb-3">OKAK Translate</h3>
+                        <p class="text-gray-400 text-sm mb-4">Перевод текста на любой язык с помощью ИИ.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-rose-500/20 rounded-full text-xs text-rose-300">100+ языков</span>
+                            <span class="px-3 py-1 bg-lime-500/20 rounded-full text-xs text-lime-300">AI</span>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-8 card-hover">
+                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center text-2xl mb-6">😂</div>
+                        <h3 class="text-xl font-bold mb-3">OKAK Fun</h3>
+                        <p class="text-gray-400 text-sm mb-4">Шутки, цитаты, интересные факты и генераторы.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-pink-500/20 rounded-full text-xs text-pink-300">Jokes</span>
+                            <span class="px-3 py-1 bg-cyan-500/20 rounded-full text-xs text-cyan-300">Quotes</span>
                         </div>
                     </div>
                 </div>
@@ -897,6 +927,72 @@ GET /api/crypto/uuid?key=YOUR_KEY</pre>
                             <button onclick="testUUID()" class="col-span-2 py-3 gradient-bg rounded-xl hover:opacity-90 transition text-sm font-semibold">Генерировать UUID</button>
                         </div>
                         <div id="cryptoResult" class="mt-4 p-4 bg-black/30 rounded-xl text-gray-300 text-sm mono break-all hidden"></div>
+                    </div>
+
+                    <!-- Weather -->
+                    <div class="glass rounded-2xl p-6 sm:p-8">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                            <span class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">🌤️</span>
+                            Погода
+                        </h3>
+                        <input type="text" id="weatherCity" class="w-full bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Введите город (например: Moscow)">
+                        <button onclick="testWeather()" id="weatherBtn" class="mt-4 w-full py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition">Узнать погоду</button>
+                        <div id="weatherResult" class="mt-4 p-4 bg-black/30 rounded-xl hidden">
+                            <div id="weatherData" class="text-gray-300 text-sm"></div>
+                        </div>
+                    </div>
+
+                    <!-- Translate -->
+                    <div class="glass rounded-2xl p-6 sm:p-8">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                            <span class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">🌍</span>
+                            Переводчик
+                        </h3>
+                        <textarea id="translateText" class="w-full h-24 bg-black/30 rounded-xl p-4 text-white placeholder-gray-500 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Текст для перевода..."></textarea>
+                        <div class="grid grid-cols-2 gap-3 mt-3">
+                            <select id="translateFrom" class="bg-black/30 rounded-xl p-3 text-white focus:outline-none">
+                                <option value="auto">Авто</option>
+                                <option value="ru">Русский</option>
+                                <option value="en">English</option>
+                                <option value="de">Deutsch</option>
+                                <option value="fr">Français</option>
+                                <option value="es">Español</option>
+                            </select>
+                            <select id="translateTo" class="bg-black/30 rounded-xl p-3 text-white focus:outline-none">
+                                <option value="en">English</option>
+                                <option value="ru">Русский</option>
+                                <option value="de">Deutsch</option>
+                                <option value="fr">Français</option>
+                                <option value="es">Español</option>
+                                <option value="zh">中文</option>
+                                <option value="ja">日本語</option>
+                            </select>
+                        </div>
+                        <button onclick="testTranslate()" id="translateBtn" class="mt-4 w-full py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition">Перевести</button>
+                        <div id="translateResult" class="mt-4 p-4 bg-black/30 rounded-xl text-gray-300 text-sm hidden whitespace-pre-wrap"></div>
+                    </div>
+
+                    <!-- Fun -->
+                    <div class="glass rounded-2xl p-6 sm:p-8">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                            <span class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center">😂</span>
+                            Развлечения
+                        </h3>
+                        <div class="grid grid-cols-1 gap-3">
+                            <button onclick="testJoke()" class="py-3 bg-black/30 rounded-xl hover:bg-white/10 transition text-sm flex items-center justify-center gap-2">
+                                <span>😄</span> Случайная шутка
+                            </button>
+                            <button onclick="testQuote()" class="py-3 bg-black/30 rounded-xl hover:bg-white/10 transition text-sm flex items-center justify-center gap-2">
+                                <span>💬</span> Цитата дня
+                            </button>
+                            <button onclick="testFact()" class="py-3 bg-black/30 rounded-xl hover:bg-white/10 transition text-sm flex items-center justify-center gap-2">
+                                <span>🧠</span> Интересный факт
+                            </button>
+                            <button onclick="testPassword()" class="py-3 gradient-bg rounded-xl hover:opacity-90 transition text-sm font-semibold flex items-center justify-center gap-2">
+                                <span>🔑</span> Сгенерировать пароль
+                            </button>
+                        </div>
+                        <div id="funResult" class="mt-4 p-4 bg-black/30 rounded-xl text-gray-300 text-sm hidden whitespace-pre-wrap"></div>
                     </div>
                 </div>
             </div>
@@ -2600,6 +2696,87 @@ img.src = url;</pre>
         function testUUID() {
             $('cryptoResult').textContent = OKAK.uuid();
             show($('cryptoResult'));
+        }
+
+        // Weather
+        async function testWeather() {
+            const city = $('weatherCity').value.trim();
+            if (!city) return toast('Введите город', true);
+            
+            $('weatherBtn').disabled = true;
+            $('weatherBtn').textContent = '⏳ Загрузка...';
+            
+            try {
+                const w = await OKAK.weather(city);
+                show($('weatherResult'));
+                $('weatherData').innerHTML = `
+                    <div class="text-center mb-4">
+                        <div class="text-4xl mb-2">${w.icon}</div>
+                        <div class="text-2xl font-bold">${w.temp}°C</div>
+                        <div class="text-gray-400">${w.description}</div>
+                        <div class="text-sm text-gray-500">${w.city}, ${w.country}</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="p-2 bg-black/20 rounded-lg">💨 Ветер: ${w.wind} км/ч</div>
+                        <div class="p-2 bg-black/20 rounded-lg">💧 Влажность: ${w.humidity}%</div>
+                        <div class="p-2 bg-black/20 rounded-lg">🌡️ Ощущается: ${w.feels_like}°C</div>
+                        <div class="p-2 bg-black/20 rounded-lg">☀️ UV: ${w.uv}</div>
+                    </div>
+                `;
+            } catch (e) {
+                toast('Ошибка: ' + e.message, true);
+            }
+            
+            $('weatherBtn').disabled = false;
+            $('weatherBtn').textContent = 'Узнать погоду';
+        }
+
+        // Translate
+        async function testTranslate() {
+            const text = $('translateText').value.trim();
+            if (!text) return toast('Введите текст', true);
+            
+            $('translateBtn').disabled = true;
+            $('translateBtn').textContent = '⏳ Перевод...';
+            show($('translateResult'));
+            $('translateResult').textContent = 'Переводим...';
+            
+            try {
+                const from = $('translateFrom').value;
+                const to = $('translateTo').value;
+                const result = await OKAK.translate(text, from, to);
+                $('translateResult').textContent = result;
+            } catch (e) {
+                $('translateResult').textContent = '❌ Ошибка перевода';
+            }
+            
+            $('translateBtn').disabled = false;
+            $('translateBtn').textContent = 'Перевести';
+        }
+
+        // Fun
+        function testJoke() {
+            $('funResult').textContent = OKAK.joke();
+            show($('funResult'));
+        }
+
+        function testQuote() {
+            const q = OKAK.quote();
+            $('funResult').innerHTML = `"${q.text}"<br><span class="text-purple-400">— ${q.author}</span>`;
+            show($('funResult'));
+        }
+
+        function testFact() {
+            $('funResult').textContent = '🧠 ' + OKAK.fact();
+            show($('funResult'));
+        }
+
+        function testPassword() {
+            const pwd = OKAK.password(16, { uppercase: true, lowercase: true, numbers: true, symbols: true });
+            $('funResult').innerHTML = `<div class="mono text-lg">${pwd}</div><div class="text-xs text-gray-500 mt-2">Нажмите чтобы скопировать</div>`;
+            $('funResult').onclick = () => { navigator.clipboard.writeText(pwd); toast('Пароль скопирован!'); };
+            $('funResult').style.cursor = 'pointer';
+            show($('funResult'));
         }
 
         // Dashboard Playground
