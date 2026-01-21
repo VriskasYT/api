@@ -1,5 +1,5 @@
 /**
- * OKAK API SDK v2.1.0
+ * OKAK API SDK v2.2.0
  * https://vriskasyt.github.io/api/
  * 
  * Официальный SDK для работы с OKAK API сервисами
@@ -15,13 +15,18 @@ const OKAK = (function() {
     
     // Обфусцированные endpoints (скрывает Pollinations)
     const _e = {
-        t: [116,101,120,116,46,112,111,108,108,105,110,97,116,105,111,110,115,46,97,105],
-        i: [105,109,97,103,101,46,112,111,108,108,105,110,97,116,105,111,110,115,46,97,105]
+        // gen.pollinations.ai (новый API)
+        g: [103,101,110,46,112,111,108,108,105,110,97,116,105,111,110,115,46,97,105],
+        // image.pollinations.ai
+        i: [105,109,97,103,101,46,112,111,108,108,105,110,97,116,105,111,110,115,46,97,105],
+        // API key (обфусцирован)
+        k: [115,107,95,105,90,105,51,99,65,55,108,57,54,107,70,79,102,109,97,66,107,83,56,119,65,81,104,49,86,79,100,113,66,68,107]
     };
     
     function _d(arr) { return String.fromCharCode.apply(null, arr); }
-    function _getTextBase() { return 'https://' + _d(_e.t); }
+    function _getGenBase() { return 'https://' + _d(_e.g); }
     function _getImageBase() { return 'https://' + _d(_e.i); }
+    function _getKey() { return _d(_e.k); }
     function _seed() { return Date.now() + Math.floor(Math.random() * 10000); }
     function _log(...args) { if (_debug) console.log('[OKAK]', ...args); }
     
@@ -100,7 +105,7 @@ const OKAK = (function() {
     ];
 
     return {
-        version: '2.1.0',
+        version: '2.2.0',
         
         // Инициализация
         init: function(apiKey) {
@@ -112,23 +117,65 @@ const OKAK = (function() {
             _debug = enabled;
         },
         
-        // ========== AI ТЕКСТ ==========
-        ai: async function(prompt, model = 'openai') {
+        // ========== AI ТЕКСТ (новый API с авторизацией) ==========
+        ai: async function(prompt, model = 'openai', options = {}) {
             if (!prompt) throw new Error('Prompt is required');
             
-            const models = ['openai', 'mistral', 'gemini', 'llama'];
+            const { stream = false, onChunk = null } = options;
+            const models = ['openai', 'mistral', 'openai-large', 'gemini'];
             const modelsToTry = [model, ...models.filter(m => m !== model)];
             
             for (const currentModel of modelsToTry.slice(0, 3)) {
                 try {
                     _log(`Trying model: ${currentModel}`);
-                    const url = `${_getTextBase()}/${encodeURIComponent(prompt)}?model=${currentModel}&seed=${_seed()}`;
-                    const response = await _fetch(url, {}, 45000);
+                    
+                    const response = await _fetch(`${_getGenBase()}/v1/chat/completions`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${_getKey()}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: currentModel,
+                            messages: [{ role: 'user', content: prompt }],
+                            stream: stream
+                        })
+                    }, 60000);
+                    
                     if (response.ok) {
-                        const text = await response.text();
-                        if (text && text.trim().length > 0) {
-                            _log('Success with model:', currentModel);
-                            return text;
+                        if (stream && onChunk) {
+                            // Обработка стриминга
+                            const reader = response.body.getReader();
+                            const decoder = new TextDecoder();
+                            let fullText = '';
+                            
+                            while (true) {
+                                const { done, value } = await reader.read();
+                                if (done) break;
+                                
+                                const chunk = decoder.decode(value);
+                                const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
+                                
+                                for (const line of lines) {
+                                    const data = line.slice(6);
+                                    if (data === '[DONE]') continue;
+                                    try {
+                                        const json = JSON.parse(data);
+                                        const content = json.choices?.[0]?.delta?.content || '';
+                                        fullText += content;
+                                        onChunk(fullText, false);
+                                    } catch {}
+                                }
+                            }
+                            onChunk(fullText, true);
+                            return fullText;
+                        } else {
+                            const data = await response.json();
+                            const text = data.choices?.[0]?.message?.content || '';
+                            if (text.trim().length > 0) {
+                                _log('Success with model:', currentModel);
+                                return text;
+                            }
                         }
                     }
                 } catch (e) {
@@ -138,20 +185,9 @@ const OKAK = (function() {
             throw new Error('AI сервис временно недоступен. Попробуйте позже.');
         },
         
-        // AI со стримингом (эмуляция)
+        // AI со стримингом
         aiStream: async function(prompt, model = 'openai', onChunk) {
-            const fullText = await this.ai(prompt, model);
-            if (typeof onChunk === 'function') {
-                const words = fullText.split(' ');
-                let current = '';
-                for (let i = 0; i < words.length; i++) {
-                    current += (i > 0 ? ' ' : '') + words[i];
-                    onChunk(current, false);
-                    await new Promise(r => setTimeout(r, 30 + Math.random() * 50));
-                }
-                onChunk(fullText, true);
-            }
-            return fullText;
+            return this.ai(prompt, model, { stream: true, onChunk });
         },
         
         // ========== ГЕНЕРАЦИЯ ИЗОБРАЖЕНИЙ ==========
@@ -236,7 +272,13 @@ const OKAK = (function() {
         // ========== ПЕРЕВОД ==========
         translate: async function(text, from = 'auto', to = 'en') {
             if (!text) throw new Error('Text is required');
-            const prompt = `Translate this text to ${to}. Only output the translation, nothing else: "${text}"`;
+            const langNames = {
+                'ru': 'Russian', 'en': 'English', 'de': 'German', 'fr': 'French',
+                'es': 'Spanish', 'it': 'Italian', 'pt': 'Portuguese', 'zh': 'Chinese',
+                'ja': 'Japanese', 'ko': 'Korean', 'ar': 'Arabic', 'hi': 'Hindi'
+            };
+            const toLang = langNames[to] || to;
+            const prompt = `Translate to ${toLang}. Output ONLY the translation, no explanations:\n${text}`;
             return await this.ai(prompt, 'mistral');
         },
         
@@ -443,5 +485,5 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 window.OKAK = OKAK;
 
-console.log('%c🚀 OKAK API SDK v2.1.0 loaded', 'color: #667eea; font-weight: bold;');
+console.log('%c🚀 OKAK API SDK v2.2.0 loaded', 'color: #667eea; font-weight: bold;');
 console.log('%c📚 Docs: https://vriskasyt.github.io/api/', 'color: #888;');
