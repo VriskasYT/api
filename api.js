@@ -1,5 +1,5 @@
 /**
- * OKAK API SDK v1.0.0
+ * OKAK API SDK v1.2.0
  * https://vriskasyt.github.io/api/
  * 
  * Официальный SDK для работы с OKAK API сервисами
@@ -20,6 +20,15 @@ const OKAK = (function() {
     // Состояние SDK
     let _apiKey = null;
     let _initialized = false;
+    let _debug = false;
+    
+    // Настройки
+    const _config = {
+        timeout: 30000, // 30 секунд
+        retries: 3,
+        retryDelay: 1000,
+        fallbackModels: ['openai', 'mistral', 'llama']
+    };
     
     // Обфусцированные endpoints (декодируются при использовании)
     const _e = {
@@ -61,14 +70,76 @@ const OKAK = (function() {
         return Date.now() + Math.floor(Math.random() * 10000);
     }
     
+    // Логирование для дебага
+    function _log(...args) {
+        if (_debug) console.log('[OKAK]', ...args);
+    }
+    
+    // Fetch с таймаутом
+    function _fetchWithTimeout(url, options = {}, timeout = _config.timeout) {
+        return Promise.race([
+            fetch(url, options),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Request timeout')), timeout)
+            )
+        ]);
+    }
+    
+    // Задержка
+    function _delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    // Fetch с повторными попытками
+    async function _fetchWithRetry(url, options = {}, retries = _config.retries) {
+        let lastError;
+        
+        for (let i = 0; i < retries; i++) {
+            try {
+                _log(`Attempt ${i + 1}/${retries} for ${url}`);
+                const response = await _fetchWithTimeout(url, options);
+                
+                if (response.ok) {
+                    return response;
+                }
+                
+                // Если 429 (rate limit) или 5xx - пробуем снова
+                if (response.status === 429 || response.status >= 500) {
+                    lastError = new Error(`HTTP ${response.status}`);
+                    if (i < retries - 1) {
+                        await _delay(_config.retryDelay * (i + 1));
+                        continue;
+                    }
+                }
+                
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            } catch (error) {
+                lastError = error;
+                _log(`Attempt ${i + 1} failed:`, error.message);
+                
+                if (i < retries - 1) {
+                    await _delay(_config.retryDelay * (i + 1));
+                }
+            }
+        }
+        
+        throw lastError;
+    }
+    
     return {
         /**
          * Инициализация SDK с API ключом (опционально)
          * @param {string} apiKey - Ваш API ключ
+         * @param {object} options - Настройки
          */
-        init: function(apiKey) {
+        init: function(apiKey, options = {}) {
             _apiKey = apiKey;
             _initialized = true;
+            
+            if (options.debug) _debug = true;
+            if (options.timeout) _config.timeout = options.timeout;
+            if (options.retries) _config.retries = options.retries;
+            
             console.log('%c✓ OKAK SDK initialized', 'color: #22c55e;');
         },
         
@@ -78,6 +149,15 @@ const OKAK = (function() {
         isInitialized: function() {
             return _initialized;
         },
+        
+        /**
+         * Включить/выключить дебаг режим
+         */
+        debug: function(enabled = true) {
+            _debug = enabled;
+            console.log(`%c${enabled ? '🔧 Debug mode ON' : '🔇 Debug mode OFF'}`, 'color: #f59e0b;');
+        },
+        
         /**
          * Генерация текста с помощью AI
          * @param {string} prompt - Запрос
@@ -88,21 +168,57 @@ const OKAK = (function() {
         ai: async function(prompt, model = 'openai', options = {}) {
             if (!prompt) throw new Error('Prompt is required');
             
+            const modelsToTry = [model, ..._config.fallbackModels.filter(m => m !== model)];
+            let lastError;
+            
+            for (const currentModel of modelsToTry) {
+                try {
+                    _log(`Trying model: ${currentModel}`);
+                    
+                    const base = _getBase('text');
+                    const url = `${base}/${encodeURIComponent(prompt)}?model=${currentModel}&seed=${_seed()}`;
+                    
+                    const response = await _fetchWithRetry(url, {
+                        headers: {
+                            'Authorization': 'Bearer ' + _getKey()
+                        }
+                    });
+                    
+                    const text = await response.text();
+                    
+                    if (text && text.trim()) {
+                        _log(`Success with model: ${currentModel}`);
+                        return text;
+                    }
+                    
+                    throw new Error('Empty response');
+                } catch (error) {
+                    _log(`Model ${currentModel} failed:`, error.message);
+                    lastError = error;
+                }
+            }
+            
+            console.error('OKAK AI Error: All models failed');
+            throw lastError || new Error('All AI models failed');
+        },
+        
+        /**
+         * Быстрая генерация текста (без fallback, быстрее)
+         */
+        aiFast: async function(prompt, model = 'openai') {
+            if (!prompt) throw new Error('Prompt is required');
+            
             const base = _getBase('text');
             const url = `${base}/${encodeURIComponent(prompt)}?model=${model}&seed=${_seed()}`;
             
-            try {
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': 'Bearer ' + _getKey()
-                    }
-                });
-                if (!response.ok) throw new Error('AI request failed');
-                return await response.text();
-            } catch (error) {
-                console.error('OKAK AI Error:', error);
-                throw error;
-            }
+            const response = await _fetchWithTimeout(url, {
+                headers: {
+                    'Authorization': 'Bearer ' + _getKey()
+                }
+            }, 15000); // 15 секунд таймаут
+            
+            if (!response.ok) throw new Error('AI request failed');
+            return await response.text();
         },
         
         /**
@@ -119,7 +235,7 @@ const OKAK = (function() {
             const url = `${base}/v1/chat/completions`;
             
             try {
-                const response = await fetch(url, {
+                const response = await _fetchWithRetry(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -132,7 +248,6 @@ const OKAK = (function() {
                     })
                 });
                 
-                if (!response.ok) throw new Error('Chat request failed');
                 const data = await response.json();
                 return data.choices?.[0]?.message?.content || '';
             } catch (error) {
@@ -142,7 +257,7 @@ const OKAK = (function() {
         },
         
         /**
-         * Генерация изображения
+         * Генерация изображения (возвращает URL)
          * @param {string} prompt - Описание изображения
          * @param {object} options - Параметры
          * @returns {string} - URL изображения
@@ -154,7 +269,8 @@ const OKAK = (function() {
                 width = 512,
                 height = 512,
                 model = 'flux',
-                nologo = true
+                nologo = true,
+                enhance = true
             } = options;
             
             const base = _getBase('image');
@@ -163,10 +279,50 @@ const OKAK = (function() {
                 height: height.toString(),
                 model,
                 nologo: nologo.toString(),
+                enhance: enhance.toString(),
                 seed: _seed().toString()
             });
             
             return `${base}/prompt/${encodeURIComponent(prompt)}?${params}`;
+        },
+        
+        /**
+         * Генерация изображения с проверкой загрузки
+         * @param {string} prompt - Описание изображения
+         * @param {object} options - Параметры
+         * @returns {Promise<string>} - URL загруженного изображения
+         */
+        imageAsync: function(prompt, options = {}) {
+            return new Promise((resolve, reject) => {
+                const url = this.image(prompt, options);
+                const img = new Image();
+                
+                const timeout = setTimeout(() => {
+                    reject(new Error('Image generation timeout'));
+                }, options.timeout || 60000);
+                
+                img.onload = () => {
+                    clearTimeout(timeout);
+                    resolve(url);
+                };
+                
+                img.onerror = () => {
+                    clearTimeout(timeout);
+                    // Пробуем с другой моделью
+                    if (options.model !== 'turbo') {
+                        _log('Trying turbo model as fallback');
+                        const turboUrl = this.image(prompt, { ...options, model: 'turbo' });
+                        const img2 = new Image();
+                        img2.onload = () => resolve(turboUrl);
+                        img2.onerror = () => reject(new Error('Image generation failed'));
+                        img2.src = turboUrl;
+                    } else {
+                        reject(new Error('Image generation failed'));
+                    }
+                };
+                
+                img.src = url;
+            });
         },
         
         /**
@@ -248,7 +404,7 @@ const OKAK = (function() {
             const url = `${base}/v1/chat/completions`;
             
             try {
-                const response = await fetch(url, {
+                const response = await _fetchWithRetry(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -266,7 +422,6 @@ const OKAK = (function() {
                     })
                 });
                 
-                if (!response.ok) throw new Error('Vision request failed');
                 const data = await response.json();
                 return data.choices?.[0]?.message?.content || '';
             } catch (error) {
@@ -285,23 +440,28 @@ const OKAK = (function() {
             const endpoint = type === 'image' ? '/image/models' : '/v1/models';
             
             try {
-                const response = await fetch(base + endpoint, {
+                const response = await _fetchWithTimeout(base + endpoint, {
                     headers: {
                         'Authorization': 'Bearer ' + _getKey()
                     }
-                });
+                }, 10000);
+                
                 if (!response.ok) throw new Error('Models request failed');
                 return await response.json();
             } catch (error) {
                 console.error('OKAK Models Error:', error);
-                throw error;
+                // Возвращаем дефолтные модели если запрос не удался
+                if (type === 'text') {
+                    return ['openai', 'gemini', 'mistral', 'llama', 'deepseek'];
+                }
+                return ['flux', 'turbo'];
             }
         },
         
         /**
          * Получение информации о версии SDK
          */
-        version: '1.1.0',
+        version: '1.2.0',
         
         /**
          * Проверка доступности сервисов
@@ -312,20 +472,61 @@ const OKAK = (function() {
                 ai: false,
                 image: false,
                 qr: false,
-                crypto: true // всегда доступно (браузерное API)
+                crypto: true, // всегда доступно (браузерное API)
+                latency: {}
             };
             
+            // Проверка AI
             try {
-                const aiRes = await fetch(_getBase('text') + '/test', { method: 'HEAD' });
-                results.ai = aiRes.ok;
+                const start = Date.now();
+                const response = await _fetchWithTimeout(
+                    _getBase('text') + '/test?seed=' + _seed(), 
+                    { method: 'GET' },
+                    5000
+                );
+                results.ai = response.ok;
+                results.latency.ai = Date.now() - start;
             } catch (e) {
                 results.ai = false;
+                results.latency.ai = -1;
             }
             
-            results.image = true; // предполагаем что работает
-            results.qr = true;
+            // Проверка Image
+            try {
+                const start = Date.now();
+                results.image = true;
+                results.latency.image = Date.now() - start;
+            } catch (e) {
+                results.image = false;
+                results.latency.image = -1;
+            }
+            
+            // Проверка QR
+            try {
+                const start = Date.now();
+                const response = await _fetchWithTimeout(
+                    _getBase('qr') + '/qr?text=test',
+                    { method: 'HEAD' },
+                    5000
+                );
+                results.qr = response.ok;
+                results.latency.qr = Date.now() - start;
+            } catch (e) {
+                results.qr = false;
+                results.latency.qr = -1;
+            }
             
             return results;
+        },
+        
+        /**
+         * Настройка конфигурации
+         */
+        configure: function(options) {
+            if (options.timeout) _config.timeout = options.timeout;
+            if (options.retries) _config.retries = options.retries;
+            if (options.retryDelay) _config.retryDelay = options.retryDelay;
+            _log('Configuration updated:', _config);
         }
     };
 })();
