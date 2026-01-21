@@ -2667,11 +2667,25 @@ img.src = url;</pre>
         function testQR() {
             const data = $('qrData').value.trim();
             if (!data) return toast('Введите данные', true);
-            const color = $('qrColor').value || '667eea';
+            const color = $('qrColor').value || '000000';
             const size = $('qrSize').value || 200;
-            const url = OKAK.qr(data, { size, color });
-            $('generatedQR').src = url;
+            
+            // Показываем загрузку
             show($('qrResult'));
+            $('generatedQR').style.opacity = '0.3';
+            
+            const url = OKAK.qr(data, { size: parseInt(size), color });
+            const img = $('generatedQR');
+            
+            img.onload = () => {
+                img.style.opacity = '1';
+                toast('QR-код создан!');
+            };
+            img.onerror = () => {
+                toast('Ошибка генерации QR', true);
+                hide($('qrResult'));
+            };
+            img.src = url;
         }
 
         async function testHash(algo) {
@@ -2705,10 +2719,11 @@ img.src = url;</pre>
             
             $('weatherBtn').disabled = true;
             $('weatherBtn').textContent = '⏳ Загрузка...';
+            show($('weatherResult'));
+            $('weatherData').innerHTML = '<div class="text-center text-gray-400">🌤️ Загружаем погоду...</div>';
             
             try {
                 const w = await OKAK.weather(city);
-                show($('weatherResult'));
                 $('weatherData').innerHTML = `
                     <div class="text-center mb-4">
                         <div class="text-4xl mb-2">${w.icon}</div>
@@ -2719,12 +2734,11 @@ img.src = url;</pre>
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <div class="p-2 bg-black/20 rounded-lg">💨 Ветер: ${w.wind} км/ч</div>
                         <div class="p-2 bg-black/20 rounded-lg">💧 Влажность: ${w.humidity}%</div>
-                        <div class="p-2 bg-black/20 rounded-lg">🌡️ Ощущается: ${w.feels_like}°C</div>
-                        <div class="p-2 bg-black/20 rounded-lg">☀️ UV: ${w.uv}</div>
                     </div>
                 `;
+                toast('Погода загружена!');
             } catch (e) {
-                toast('Ошибка: ' + e.message, true);
+                $('weatherData').innerHTML = `<div class="text-center text-red-400">❌ ${e.message}</div>`;
             }
             
             $('weatherBtn').disabled = false;
@@ -2739,41 +2753,47 @@ img.src = url;</pre>
             $('translateBtn').disabled = true;
             $('translateBtn').textContent = '⏳ Перевод...';
             show($('translateResult'));
-            $('translateResult').textContent = 'Переводим...';
+            $('translateResult').textContent = '🔄 Переводим... (5-15 сек)';
             
             try {
                 const from = $('translateFrom').value;
                 const to = $('translateTo').value;
                 const result = await OKAK.translate(text, from, to);
                 $('translateResult').textContent = result;
+                toast('Переведено!');
             } catch (e) {
-                $('translateResult').textContent = '❌ Ошибка перевода';
+                $('translateResult').textContent = '❌ Ошибка. Попробуйте короткий текст.';
             }
             
             $('translateBtn').disabled = false;
             $('translateBtn').textContent = 'Перевести';
         }
 
-        // Fun
+        // Fun - ВСЕ ЛОКАЛЬНЫЕ, МОМЕНТАЛЬНО РАБОТАЮТ
         function testJoke() {
-            $('funResult').textContent = OKAK.joke();
+            const joke = OKAK.joke();
+            $('funResult').innerHTML = `<div class="text-lg">😄</div><div class="mt-2">${joke}</div>`;
             show($('funResult'));
+            toast('Вот шутка!');
         }
 
         function testQuote() {
             const q = OKAK.quote();
-            $('funResult').innerHTML = `"${q.text}"<br><span class="text-purple-400">— ${q.author}</span>`;
+            $('funResult').innerHTML = `<div class="text-lg">💬</div><div class="mt-2 italic">"${q.text}"</div><div class="text-purple-400 mt-2">— ${q.author}</div>`;
             show($('funResult'));
+            toast('Вот цитата!');
         }
 
         function testFact() {
-            $('funResult').textContent = '🧠 ' + OKAK.fact();
+            const fact = OKAK.fact();
+            $('funResult').innerHTML = `<div class="text-lg">🧠</div><div class="mt-2">${fact}</div>`;
             show($('funResult'));
+            toast('Интересно!');
         }
 
         function testPassword() {
             const pwd = OKAK.password(16, { uppercase: true, lowercase: true, numbers: true, symbols: true });
-            $('funResult').innerHTML = `<div class="mono text-lg">${pwd}</div><div class="text-xs text-gray-500 mt-2">Нажмите чтобы скопировать</div>`;
+            $('funResult').innerHTML = `<div class="text-lg">🔑</div><div class="mono text-lg mt-2 p-2 bg-black/30 rounded-lg select-all">${pwd}</div><div class="text-xs text-gray-500 mt-2">Нажмите чтобы скопировать</div>`;
             $('funResult').onclick = () => { navigator.clipboard.writeText(pwd); toast('Пароль скопирован!'); };
             $('funResult').style.cursor = 'pointer';
             show($('funResult'));
@@ -2851,9 +2871,23 @@ img.src = url;</pre>
         function dTestQR() {
             const data = $('dQrData').value.trim();
             if (!data) return toast('Введите данные', true);
-            $('dGenQR').src = OKAK.qr(data, { size: 200, color: '667eea' });
+            
             show($('dQrResult'));
-            trackUsage('qr', 'Генерация QR-кода', data.substring(0, 30));
+            $('dGenQR').style.opacity = '0.3';
+            
+            const url = OKAK.qr(data, { size: 200, color: '667eea' });
+            const img = $('dGenQR');
+            
+            img.onload = () => {
+                img.style.opacity = '1';
+                toast('QR создан!');
+                trackUsage('qr', 'Генерация QR-кода', data.substring(0, 30));
+            };
+            img.onerror = () => {
+                toast('Ошибка QR', true);
+                hide($('dQrResult'));
+            };
+            img.src = url;
         }
 
         async function dHash(algo) {
